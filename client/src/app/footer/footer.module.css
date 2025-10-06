@@ -1,0 +1,10 @@
+.footer-container {
+    margin-top: 5px;
+    height: 30px;
+    background-color: yellowgreen;
+}
+
+.logout-button {
+    margin-left: 20px;
+    margin: 5px auto 5px 20px;
+}

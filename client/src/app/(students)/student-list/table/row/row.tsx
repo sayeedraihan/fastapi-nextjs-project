@@ -1,0 +1,93 @@
+"use client"
+
+import { Student, useSelectedStudent } from "@/app/contexts/student-context";
+import DataCell from "../cell/dataCell/dataCell";
+import HeadCell from "../cell/headCell/headCell"
+import { handleTableRowClickEvent } from "@/app/(students)/students";
+import { useRouter } from "next/navigation";
+
+export type TableRowProps = {
+    columnHeaders: string[];
+    rowData?: Student;
+    onDeleteClick?: (id: string) => void;
+    index?: number;
+}
+
+export type StudentDeleteParams = {
+    id: string;
+}
+
+const TableRow = ({columnHeaders, rowData, onDeleteClick, index}: TableRowProps) => {
+    const router = useRouter();
+    const { setSelectedStudent } = useSelectedStudent();
+
+    if(columnHeaders && columnHeaders.length > 0) {
+        return (
+            <tr className="my-4 text-fontcolor">
+                {columnHeaders?.map((header) => (
+                    <HeadCell key={header} text={header} />
+                ))}
+            </tr>
+        )
+    } else if(rowData) {
+        const studentId = rowData.id;
+        return (
+            <tr className={`text-fontcolor hover:bg-secondary hover:text-fontcolor`}>
+                <td
+                    onClick={() => {handleTableRowClickEvent(studentId, setSelectedStudent, router)}} 
+                    className={`
+                        border-bordercolor border-2 
+                        ${"hover:cursor-pointer"}
+                    `}
+                >
+                    {index}
+                </td>
+                {Object.values(rowData).map((data, lowerIndex) => (
+                    (lowerIndex > 0) && 
+                    <DataCell 
+                        key={(Object.values(rowData)[0] as string) + lowerIndex} 
+                        cellData={data as string} 
+                        studentId={studentId}
+                        clickable={lowerIndex < 2}
+                    />
+                ))}
+                <td className="border-bordercolor border-2">
+                    <button 
+                        onClick={() => onDeleteClick && onDeleteClick(rowData.id.toString())} 
+                        className="
+                            py-1 px-2  
+                            mx-1 my-1 align-middle
+                            bg-secondary hover:bg-bordercolor rounded-md shadow-md 
+                            text-fontcolor font-bold 
+                            focus:outline-none focus:ring-1 focus:ring-fontcolor focus:ring-opacity-75
+                            transition duration-150 ease-in-out
+                        "
+                    >
+                        Delete
+                    </button>
+                    <button 
+                        onClick={() => {handleTableRowClickEvent(studentId, setSelectedStudent, router)}} 
+                        className="
+                            py-1 px-4  
+                            mx-1 my-1 align-middle
+                            bg-secondary hover:bg-bordercolor rounded-lg shadow-md 
+                            text-fontcolor font-bold hover:text-secondary
+                            focus:outline-none focus:ring-1 focus:ring-fontcolor focus:ring-opacity-75
+                            transition duration-150 ease-in-out
+                        "
+                    >
+                        Edit
+                    </button>
+                </td>
+            </tr>
+        )
+    } else {
+        return (
+            <tr>
+                <DataCell cellData="" studentId={0} />
+            </tr>
+        )
+    }
+}
+
+export default TableRow;

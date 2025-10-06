@@ -1,0 +1,259 @@
+"use client"
+
+import { useEffect, useState } from "react";
+import { Course, Performance } from "../../../students";
+import { useSelectedStudent } from "../../../../contexts/student-context";
+import styles from "../../../page.module.css";
+import { useModal } from "../../../../hooks/modal/useModal";
+import Modal from "../../../../custom-components/modal/modal";
+
+// This component displays and manages the performance records for a selected student.
+const PerformancePage = () => {
+    // State management for student, courses, performances, loading, and errors.
+    const { selectedStudent } = useSelectedStudent();
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [performances, setPerformances] = useState<Performance[]>([]);
+    const [originalPerformances, setOriginalPerformances] = useState<Performance[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const { isOpen, showModal, hideModal, message } = useModal();
+    const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
+
+    // Effect to fetch initial data (courses and student's performances).
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!selectedStudent || !selectedStudent.id) {
+                setLoading(false);
+                setError("No student selected. Please go to the student list and select a student.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/routes/get-courses-and-student-performance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_id: selectedStudent.id }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || "Failed to fetch data");
+                }
+
+                const data = await response.json();
+                setCourses(data.courses);
+                setPerformances(data.performances);
+                setOriginalPerformances(data.performances); // Store original state for cancel functionality
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [selectedStudent]);
+
+    // Handles adding a new, empty, editable row to the performance table.
+    const handleAddRow = () => {
+        const newRow: Performance = {
+            student_id: selectedStudent.id,
+            course_id: 0,
+            attendance: 0,
+            semester: 0,
+            practical: 0,
+            in_course: 0,
+        };
+        const newPerformances = [...performances, newRow];
+        setPerformances(newPerformances);
+        setEditingRowIndex(newPerformances.length - 1);
+    };
+    
+    // Updates the state for a specific field in a row.
+    const handleInputChange = (index: number, field: keyof Performance, value: string | number) => {
+        const newPerformances = [...performances];
+        (newPerformances[index] as any)[field] = value;
+        setPerformances(newPerformances);
+    };
+
+    // Validates and handles changes to the course selection.
+    const handleCourseChange = (index: number, courseId: number) => {
+        const isDuplicate = performances.some((p, i) => i !== index && p.course_id === courseId);
+        if (isDuplicate) {
+            showModal("This course is already in the performance list. Please edit the existing record.");
+            handleInputChange(index, 'course_id', 0); // Reset dropdown
+            return;
+        }
+        handleInputChange(index, 'course_id', courseId);
+    };
+
+    // Saves a new or updated performance record to the database.
+    const handleSave = async (index: number) => {
+        const performance = performances[index];
+        const isNew = !originalPerformances.find(p => p.course_id === performance.course_id && p.student_id === performance.student_id);
+
+        try {
+            const response = await fetch(isNew ? '/routes/add-performance' : '/routes/update-performance', {
+                method: isNew ? 'POST' : 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(performance),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to save performance');
+            }
+
+            const savedPerformance = await response.json();
+            const newPerformances = [...performances];
+            newPerformances[index] = savedPerformance;
+            setPerformances(newPerformances);
+            setOriginalPerformances(newPerformances); // Update original state
+            setEditingRowIndex(null); // Exit editing mode
+        } catch (error: any) {
+            showModal(error.message);
+        }
+    };
+
+    // Enables editing for a specific row.
+    const handleEdit = (index: number) => {
+        setEditingRowIndex(index);
+    };
+
+    // Deletes a performance record from the database.
+    const handleDelete = async (index: number) => {
+        const performance = performances[index];
+        try {
+            const response = await fetch('/routes/delete-performance', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: performance.student_id, course_id: performance.course_id }),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to delete performance');
+            }
+            const newPerformances = performances.filter((_, i) => i !== index);
+            setPerformances(newPerformances);
+            setOriginalPerformances(newPerformances);
+        } catch (error: any) {
+            showModal(error.message);
+        }
+    };
+
+    // Cancels the editing process, reverting changes or removing a new row.
+    const handleCancel = (index: number) => {
+        const performance = performances[index];
+        // If it's a new row that hasn't been saved, remove it
+        if (!originalPerformances.find(p => p.course_id === performance.course_id && p.student_id === performance.student_id)) {
+            setPerformances(performances.filter((_, i) => i !== index));
+        } else {
+            // Otherwise, revert to original state
+            const revertedPerformances = [...performances];
+            revertedPerformances[index] = originalPerformances[index];
+            setPerformances(revertedPerformances);
+        }
+        setEditingRowIndex(null);
+    };
+
+    // Render loading state
+    if (loading) {
+        return <div className="p-4 text-center">Loading...</div>;
+    }
+
+    // Render error state
+    if (error) {
+        return <div className={`p-4 text-center ${styles.errorText}`}>Error: {error}</div>;
+    }
+
+    // Main component render
+    return (
+        <div className="p-4">
+            <Modal isOpen={isOpen} onClose={hideModal} message={message} />
+            <div className="flex justify-between items-center mb-4">
+                <h1 className="text-xl font-bold text-fontcolor">Student Performance</h1>
+                <button
+                    onClick={handleAddRow}
+                    className="py-2 px-4 bg-bordercolor hover:bg-secondary rounded-lg shadow-md text-fontcolor font-bold focus:outline-none focus:ring-1 focus:ring-fontcolor transition duration-150 ease-in-out"
+                >
+                    + Add Performance
+                </button>
+            </div>
+            <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                    <thead className="text-xs uppercase bg-secondary">
+                        <tr>
+                            <th className="px-6 py-3">Course Name</th>
+                            <th className="px-6 py-3">Description</th>
+                            <th className="px-6 py-3">Attendance</th>
+                            <th className="px-6 py-3">Semester</th>
+                            <th className="px-6 py-3">Practical</th>
+                            <th className="px-6 py-3">In-course</th>
+                            <th className="px-6 py-3 text-center">Actions</th>
+                            <th className="px-6 py-3 text-center">Save/Cancel</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {performances.map((p, index) => {
+                            const course = courses.find(c => c.id === p.course_id);
+                            const isEditing = editingRowIndex === index;
+
+                            return (
+                                <tr key={index} className="border-b border-bordercolor hover:bg-secondary">
+                                    <td className="px-6 py-4">
+                                        {isEditing ? (
+                                            <select
+                                                value={p.course_id}
+                                                onChange={(e) => handleCourseChange(index, parseInt(e.target.value))}
+                                                className="w-full p-1 border-bordercolor border-2 rounded-md bg-secondary focus:outline-none focus:ring-1 focus:ring-fontcolor"
+                                            >
+                                                <option value={0} disabled>--Select--</option>
+                                                {courses.map(c => (
+                                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            course?.name
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4">{course?.description}</td>
+                                     {/* Render inputs for editable fields */}
+                                    {['attendance', 'semester', 'practical', 'in_course'].map(field => (
+                                        <td key={field} className="px-6 py-4">
+                                            {isEditing ? (
+                                                <input
+                                                    type="number"
+                                                    value={p[field as keyof Performance] === 0 ? '' : p[field as keyof Performance]}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value;
+                                                        const numericValue = value === '' ? 0 : parseFloat(value);
+                                                        if (!isNaN(numericValue)) {
+                                                            handleInputChange(index, field as keyof Performance, numericValue);
+                                                        }
+                                                    }}
+                                                    className="w-20 p-1 border-bordercolor border-2 rounded-md bg-secondary no-arrows focus:outline-none focus:ring-1 focus:ring-fontcolor"
+                                                />
+                                            ) : (
+                                                p[field as keyof Performance]
+                                            )}
+                                        </td>
+                                    ))}
+                                    <td className="px-6 py-4 text-center">
+                                        <button onClick={() => handleEdit(index)} disabled={isEditing || !p.course_id} className="font-medium text-blue-500 hover:underline disabled:text-gray-400 disabled:no-underline">Edit</button>
+                                        <button onClick={() => handleDelete(index)} disabled={isEditing || !p.course_id} className="font-medium text-red-500 hover:underline ml-4 disabled:text-gray-400 disabled:no-underline">Delete</button>
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <button onClick={() => handleSave(index)} disabled={!isEditing} className="font-medium text-green-500 hover:underline disabled:text-gray-400 disabled:no-underline">Save</button>
+                                        <button onClick={() => handleCancel(index)} disabled={!isEditing} className="font-medium text-gray-500 hover:underline ml-4 disabled:text-gray-400 disabled:no-underline">Cancel</button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+export default PerformancePage;

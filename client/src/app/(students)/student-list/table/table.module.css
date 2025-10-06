@@ -1,0 +1,29 @@
+.table {
+    border-width: 2px;
+    border-color: red;
+    border-style: dotted;
+    color: black;
+}
+
+.table-header {
+    border-width: 2px;
+    border-color: red;
+    border-style: dotted;
+    color: black;
+}
+
+.data-row-cell {
+    border-width: 2px;
+    border-color: violet;
+    border-style: dashed;
+    width: 60px;
+}
+
+.header-row-cell {
+    border-width: 2px;
+    border-color: violet;
+    border-style: dashed;
+    width: 60px;
+    padding-left: 10px;
+    color: black;
+}

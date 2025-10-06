@@ -1,0 +1,40 @@
+.container {
+    font-family: "sans-serif";
+    padding: "2rem";
+    max-width: "800px";
+    margin: "0 auto";
+}
+
+.header {
+    margin-bottom: "1.5rem";
+    border-bottom: "2px solid #eee";
+    padding-bottom: "0.5rem";
+}
+
+.list {
+    list-style-type: "none";
+    padding: 0;
+}
+
+.listItem {
+    padding: "1rem";
+    border: "1px solid #ddd";
+    border-radius: "5px";
+    margin-bottom: "0.5rem";
+    display: "flex";
+    justify-content: "space-between";
+    align-items: "center";
+}
+
+.studentName {
+    font-weight: "bold";
+}
+
+.studentDetails {
+    color: "#555",
+}
+
+.errorText {
+    color: "red";
+    font-weight: "bold";
+}

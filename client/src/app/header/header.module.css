@@ -1,0 +1,28 @@
+.navbar {
+    display: flex;
+    justify-content: space-evenly;
+    width: 500px;
+    /* height: 20px; */
+    /* padding: 2px 0px 5px 0px; */
+    background-color: #9acd32;
+    margin-bottom: 10px;
+}
+
+.navbarLink {
+    margin-right: 2px;
+    border: 5px;
+    border-color: black;
+    font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+}
+
+.active-link {
+    font-weight: 700px; /* or 'bold' */
+    margin-right: 4px;
+    color: black;
+}
+
+.inactive-link {
+    font-weight: 500px;
+    color: #3b82f6;
+    margin-right: 4px;
+}
