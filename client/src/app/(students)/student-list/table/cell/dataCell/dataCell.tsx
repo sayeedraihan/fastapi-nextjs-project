@@ -18,7 +18,7 @@ const DataCell = ({cellData, studentId, clickable}: DataCellProps) => {
         <td 
             onClick={clickable ? () => {handleTableRowClickEvent(studentId, setSelectedStudent, router)} : (() => {})} 
             className={`
-                border-bordercolor border-2 
+                border-subtle border-2 
                 ${clickable ? "hover:cursor-pointer" : ""}
             `}
         >

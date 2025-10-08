@@ -2,7 +2,7 @@ import Modal from "@/app/custom-components/modal/modal";
 import { Student } from "../../../contexts/student-context";
 import TableBody from "./body/body"
 import TableHeader from "./header/header"
-import styles from "./table.module.css"
+
 import { useModal } from "@/app/hooks/modal/useModal";
 import { useStudentList } from "@/app/contexts/student-list-context";
 import { useState } from "react";
@@ -78,7 +78,7 @@ const Table = ({columnHeaders, tableData}: TableProps) => {
                 message={successMessage}
                 // showCancelButton={false}
             />
-            <table className={styles.table}>
+            <table className="w-full text-sm text-left">
                 <TableHeader columnHeaders={columnHeaders}/>
                 <TableBody 
                     tableData={tableData} 

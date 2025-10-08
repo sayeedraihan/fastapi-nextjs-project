@@ -6,7 +6,7 @@ export type TableHeaderProps = {
 
 const TableHeader = ({ columnHeaders }: TableHeaderProps) => {
     return (
-        <thead className={`text-fontcolor`}>
+        <thead className={`text-textprimary`}>
             <TableRow columnHeaders={columnHeaders} />
         </thead>
     )

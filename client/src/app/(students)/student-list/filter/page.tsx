@@ -113,7 +113,7 @@ const Filter = () => {
     }
 
     return (
-        <form className={`styles["form-container"] p-2`} onSubmit={handleSubmit(onFilterSubmit)}>
+        <form className="p-2" onSubmit={handleSubmit(onFilterSubmit)}>
             <div className="flex flex-col items-center">
                 <div>
                     <label htmlFor="field">Field: </label>
@@ -126,9 +126,9 @@ const Filter = () => {
                             ml-1 
                             p-1 
                             w-60 
-                            border-bordercolor border-2 rounded-md 
-                            focus:outline-none focus:ring-1 focus:ring-fontcolor 
-                            bg-secondary 
+                            border-subtle border-2 rounded-md 
+                            focus:outline-none focus:ring-1 focus:ring-primary 
+                            bg-surface 
                         "
                     >
                         <option value="" disabled>--Please choose an option--</option>
@@ -156,9 +156,9 @@ const Filter = () => {
                                 ml-1 
                                 p-1 
                                 w-60 
-                                border-bordercolor border-2 rounded-md 
-                                focus:outline-none focus:ring-1 focus:ring-fontcolor 
-                                bg-secondary 
+                                border-subtle border-2 rounded-md 
+                                focus:outline-none focus:ring-1 focus:ring-primary 
+                                bg-surface 
                                 ${inputType == "number" ? "no-arrows" : ""}
                             `}
                         />
@@ -176,9 +176,9 @@ const Filter = () => {
                                 ml-1 
                                 p-1 
                                 w-60 
-                                border-bordercolor border-2 rounded-md 
-                                focus:outline-none focus:ring-1 focus:ring-fontcolor 
-                                bg-secondary 
+                                border-subtle border-2 rounded-md 
+                                focus:outline-none focus:ring-1 focus:ring-primary 
+                                bg-surface 
                             "
                         >
                             <option value="" disabled>--Please choose an option--</option>
@@ -202,9 +202,9 @@ const Filter = () => {
                     className="
                         py-2 px-4 
                         mx-2 
-                        bg-bordercolor hover:bg-secondary rounded-lg shadow-md 
-                        text-fontcolor font-bold 
-                        focus:outline-none focus:ring-1 focus:ring-fontcolor focus:ring-opacity-75
+                        bg-primary hover:bg-primary/90 rounded-lg shadow-md 
+                        text-textprimary font-bold 
+                        focus:outline-none focus:ring-1 focus:ring-primary focus:ring-opacity-75
                         transition duration-150 ease-in-out
                     "
                 >
@@ -219,10 +219,10 @@ const Filter = () => {
                     className="
                         py-2 px-4 
                         mx-2
-                        bg-transparent hover:bg-secondary rounded-lg 
-                        border border-bordercolor hover:border-transparent 
-                        text-fontcolor font-bold hover:text-fontcolor 
-                        focus:outline-none focus:ring-1 focus:ring-fontcolor focus:ring-opacity-75 
+                        bg-transparent hover:bg-destructive rounded-lg 
+                        border border-subtle hover:border-transparent 
+                        text-textprimary font-bold hover:text-textprimary 
+                        focus:outline-none focus:ring-1 focus:ring-destructive focus:ring-opacity-75 
                         transition duration-150 ease-in-out
                     "
                 >

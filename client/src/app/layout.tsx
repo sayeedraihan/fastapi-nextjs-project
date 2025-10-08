@@ -18,13 +18,13 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className="flex flex-row justify-center items-center h-screen text-fontcolor">
+			<body className="flex flex-row justify-center items-center h-screen bg-background text-textprimary">
 				<UtilsObjectContextProvider>
 					<StudentListContextProvider>
 						<StudentContextProvider>
 							<div>
 								<Header />
-								<div className={`bg-primaryorbackground h-2/3 overflow-y-auto`}>
+								<div className={`bg-surface h-2/3 overflow-y-auto`}>
 									{children}
 								</div>
 								<Footer />

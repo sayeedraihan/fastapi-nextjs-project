@@ -25,16 +25,16 @@ const Footer = () => {
         }
     };
     return (
-        <div className={`bg-primaryorbackground`}>
+        <div className={`bg-surface`}>
             <button 
                 onClick={handleLogout}
                 className="
                     py-2 px-4 
                     mx-2 my-2
-                    bg-transparent hover:bg-secondary rounded-lg 
-                    border border-bordercolor hover:border-transparent 
-                    text-fontcolor font-bold hover:text-fontcolor 
-                    focus:outline-none focus:ring-1 focus:ring-fontcolor focus:ring-opacity-75 
+                    bg-transparent hover:bg-destructive rounded-lg 
+                    border border-subtle hover:border-transparent 
+                    text-textprimary font-bold hover:text-textprimary 
+                    focus:outline-none focus:ring-1 focus:ring-destructive focus:ring-opacity-75 
                     transition duration-150 ease-in-out
                 "
             >
