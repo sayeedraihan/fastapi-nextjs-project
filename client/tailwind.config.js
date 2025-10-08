@@ -11,7 +11,7 @@ module.exports = {
         // "Nordic Night" - A modern, eye-friendly dark theme.
         background: '#0F172A', // Deep Dark Blue (Slate 900)
         surface: '#1E293B',    // Dark Blue-Gray (Slate 800)
-        primary: '#FBBF24',    // Vibrant Amber (Amber 400) for high contrast
+        primary: '#3B278C',    // Deep Koamaru / Persian Blue / Violent Violet for high contrast
         destructive: '#F43F5E',// Soft Red (Rose 500)
         success: '#14B8A6',    // Muted Green (Teal 500)
         subtle: '#334155',     // Muted Blue-Gray for borders (Slate 700)
