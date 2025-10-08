@@ -6,7 +6,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from src import models
+from src.models.user import User
+from src.models.course import Course
+from src.models.performance import Performance
+from src.models.student import Student
 from routes import student_routes, db_routes
 from src.routes import authentication_routes, user_routes, performance_routes
 from src.templating import template_Init
