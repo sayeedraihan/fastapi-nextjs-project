@@ -28,15 +28,18 @@ const Filter = () => {
     const mediums = utilsObject.mediums;
 
     useEffect(() => {
-        if(selectedProperty === "") {
+        if(selectedValue === "") {
             setFilterButtonDisabled(true);
-            return;
+        } else {
+            setFilterButtonDisabled(false);
         }
-        setFilterButtonDisabled(false);
+    }, [selectedValue]);
+
+    useEffect(() => {
         setSelectedValue("");
-        if(["id", "name", "section"].includes(selectedProperty)) {
+        if(["id", "name", "section", "all"].includes(selectedProperty)) {
             setFieldType("input");
-            if(["name", "section"].includes(selectedProperty)) {
+            if(["name", "section", "all"].includes(selectedProperty)) {
                 setInputType("text");
             } else {
                 setInputType("number");
@@ -49,78 +52,47 @@ const Filter = () => {
                 setOptions(mediums);
             }
         }
-    }, [selectedProperty, levels, mediums])
+    }, [selectedProperty, levels, mediums]);
 
-    const onPropertyChanged = (ref: HTMLSelectElement | null) => {
-        if (ref) {
-            setSelectedProperty(ref.value);
-        }
-    }
-
-    const onClearFilterClicked = async() => {
+    const onClearFilterClicked = () => {
         setSelectedValue("");
+        setSelectedProperty("id");
+        setResultantStudentList(originalStudentList);
         setFilterButtonDisabled(true);
-        try {
-            const response = await fetch(`/routes/get-all-students`);
-            if(!response.ok) {
-                const responseText = await response.text();
-                throw new Error("Failed to fetch all students. Reason: " + responseText);
-            } else {
-                const responseClone = response.clone();
-                const responseText = await responseClone.text();
-                const objects: Student[] = JSON.parse(responseText);
-                convertResponseToStudentList(objects, setTotalStudentList);
-            }
-        } catch (error: unknown) {
-            if(error instanceof Error) {
-                throw new Error("Could not fetch all students. Reason: " + error.message);
-            } else {
-                throw new Error("Could not fetch all students. Reason unknown.");
-            }
-        }
     }
 
-    const onFilterSubmit = async() => {
-        try {
-            const filterParams: StudentFilterParams = {
-                prop: selectedProperty,
-                val: selectedValue
-            }
-            const response = await fetch(`/routes/get-students-by-filter`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(filterParams),
-            });
-
-            if(!response.ok) {
-                const responseText = await response.text();
-                throw new Error("Failed to fetch filtered student list. Reason: " + responseText);
+    const onFilterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const filteredList = originalStudentList.filter(student => {
+            if (selectedProperty === "all") {
+                const selectedValueString = selectedValue.toLowerCase();
+                return (
+                    student.name && student.name.toLowerCase().includes(selectedValueString) ||
+                    student.section && student.section.toLowerCase().includes(selectedValueString) ||
+                    student.medium && student.medium.toLowerCase().includes(selectedValueString)
+                );
             } else {
-                const responseClone = response.clone();
-                const responseText = await responseClone.text();
-                const objects: Student[] = JSON.parse(responseText);
-                convertResponseToStudentList(objects, setTotalStudentList);
+                const studentValue = student[selectedProperty as keyof typeof student];
+                if (studentValue !== undefined && studentValue !== null) {
+                    const studentValueString = studentValue.toString().toLowerCase();
+                    const selectedValueString = selectedValue.toLowerCase();
+                    return studentValueString === selectedValueString;
+                }
             }
-        } catch (error: unknown) {
-            if(error instanceof Error) {
-                throw new Error("Could not fetch students according to the filter. Reason: " + error.message);
-            } else {
-                throw new Error("Could not fetch students according to the filter. Reason unknown.");
-            }
-        }
-
+            return false;
+        });
+        setResultantStudentList(filteredList);
     }
 
     return (
-        <form className="p-2" onSubmit={handleSubmit(onFilterSubmit)}>
+        <form className="p-2" onSubmit={(e) => onFilterSubmit(e)}>
             <div className="flex flex-col items-center">
                 <div>
                     <label htmlFor="field">Field: </label>
                     <select
                         id="field"
-                        ref={filterPropertySelectRef}
-                        onChange={() => {onPropertyChanged(filterPropertySelectRef.current)}}
-                        defaultValue={selectedProperty}
+                        onChange={(e) => setSelectedProperty(e.target.value)}
+                        value={selectedProperty}
                         className="
                             ml-1 
                             p-1 
@@ -131,6 +103,7 @@ const Filter = () => {
                         "
                     >
                         <option value="" disabled>--Please choose an option--</option>
+                        <option value="all">All</option>
                         {fields.map((field, index) => {
                             const [key, value] = Object.entries(field)[0];
                             return (
@@ -211,10 +184,7 @@ const Filter = () => {
                 </button>
                 <button 
                     type="button" 
-                    onClick={() => {
-                        onPropertyChanged(filterPropertySelectRef.current);
-                        onClearFilterClicked();
-                    }}
+                    onClick={onClearFilterClicked}
                     className="
                         py-2 px-4 
                         mx-2
