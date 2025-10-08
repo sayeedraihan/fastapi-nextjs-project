@@ -13,9 +13,6 @@ class StudentBase(SQLModel):
 class StudentDetailsParams:
     id: str = None
 
-class StudentFilterParams(SQLModel):
-    prop: str = None
-    val: str = None
 
 class StudentDeleteParams(SQLModel):
     id: str = None
