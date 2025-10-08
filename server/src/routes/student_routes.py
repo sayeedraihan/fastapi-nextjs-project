@@ -8,11 +8,10 @@ from starlette.responses import JSONResponse
 from src.database.db import get_session, sqlite_file_name
 from src.database.student.delete_student import delete_student_by_id
 from src.database.student.insert_student import add_demo_students, add_student
-from src.database.student.read_student import select_all_students, select_student_by_id, \
-    select_students_by_filter
+from src.database.student.read_student import select_all_students, select_student_by_id
 from src.database.student.update_student import update_student_by_id
 from src.models.db_models import Student
-from src.models.student import StudentBase, StudentUpdateResponseParams, StudentDeleteParams, StudentFilterParams
+from src.models.student import StudentBase, StudentUpdateResponseParams, StudentDeleteParams
 from src.models.user import User
 from src.routes.base_routes import get_router
 from src.utils.user_utils import get_current_active_user
@@ -78,17 +77,6 @@ def delete_students_by_id(*, session: Session = Depends(get_session),
     setattr(session, "property", "id")
     setattr(session, "value", delete_params.id)
     students: list[Student] = delete_student_by_id(session)
-    if not students:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "No student deleted")
-    return students
-
-@router.post("/get-students-by-filter")
-def get_student_by_filter(*, session: Session = Depends(get_session),
-                          filter_params: Optional[StudentFilterParams] = None,
-                          current_user: Annotated[User, Depends(get_current_active_user)]) -> list[Student]:
-    setattr(session, "property", filter_params.prop)
-    setattr(session, "value", filter_params.val)
-    students: list[Student] = select_students_by_filter(session)
     if not students:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "No student deleted")
     return students
