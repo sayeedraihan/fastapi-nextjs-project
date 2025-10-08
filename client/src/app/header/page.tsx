@@ -1,11 +1,11 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useSelectedStudent } from "../contexts/student-context"
+import { useStudent } from "../contexts/student-context"
 
 const Header = () => {
     const pathname = usePathname();
-    const { selectedStudent } = useSelectedStudent();
+    const { selectedStudent } = useStudent();
     const linkRefs = [
         {
             linkName: "Home",

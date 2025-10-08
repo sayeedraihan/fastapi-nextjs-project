@@ -1,6 +1,6 @@
 "use client"
 
-import { Student, useSelectedStudent } from "@/app/contexts/student-context";
+import { Student, useStudent } from "@/app/contexts/student-context";
 import DataCell from "../cell/dataCell/dataCell";
 import HeadCell from "../cell/headCell/headCell"
 import { handleTableRowClickEvent } from "@/app/(students)/students";
@@ -19,7 +19,7 @@ export type StudentDeleteParams = {
 
 const TableRow = ({columnHeaders, rowData, onDeleteClick, index}: TableRowProps) => {
     const router = useRouter();
-    const { setSelectedStudent } = useSelectedStudent();
+    const { setSelectedStudent } = useStudent();
 
     if(columnHeaders && columnHeaders.length > 0) {
         return (

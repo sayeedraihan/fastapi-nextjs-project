@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation";
-import { useSelectedStudent } from "@/app/contexts/student-context";
+import { useStudent } from "@/app/contexts/student-context";
 import { handleTableRowClickEvent } from "@/app/(students)/students";
 
 export type DataCellProps = {
@@ -12,7 +12,7 @@ export type DataCellProps = {
 
 const DataCell = ({cellData, studentId, clickable}: DataCellProps) => {
     const router = useRouter();
-    const { setSelectedStudent } = useSelectedStudent();
+    const { setSelectedStudent } = useStudent();
 
     return (
         <td 

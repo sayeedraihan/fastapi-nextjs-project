@@ -1,10 +1,9 @@
 "use client"
 
 import { useUtilsObject } from "@/app/contexts/utils_context";
-import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useStudentList } from "@/app/contexts/student-list-context";
-import { convertResponseToStudentList, Student } from "../../students";
+import { useEffect, useState } from "react";
+
+import { useStudent } from "@/app/contexts/student-context";
 
 export type StudentFilterParams = {
     prop: string;
@@ -19,10 +18,10 @@ const Filter = () => {
     const [ inputType, setInputType ] = useState<string>("number");
     const [ options, setOptions ] = useState<{ [key: string]: string; }[]>([]);
     const [ isFilterButtonDisabled, setFilterButtonDisabled ] = useState<boolean>(true);
-    const filterPropertySelectRef = useRef<HTMLSelectElement>(null);
-    const { handleSubmit, formState: {} } = useForm();
+
+
     const { utilsObject  } = useUtilsObject();
-    const { setTotalStudentList } = useStudentList();
+    const { originalStudentList, setResultantStudentList } = useStudent();
 
     const fields = utilsObject.fields;
     const levels = utilsObject.levels;

@@ -1,11 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Student } from "../../contexts/student-context"
+import { Student, useStudent } from "../../contexts/student-context"
 
 import Table from "./table/table"
 import { convertResponseToStudentList } from "../students"
-import { useStudentList } from "@/app/contexts/student-list-context"
 import Filter from "./filter/page"
 import { catchError } from "@/app/routes/route_utils"
 
@@ -13,7 +12,7 @@ const StudentList = () => {
     const [ loading, setLoading ] = useState(true);
     const [ error ] = useState<string | null>(null);
     const [ initialLoad, setInitialLoad ] = useState<boolean>(true);
-    const { totalStudentList, setTotalStudentList } = useStudentList();
+    const { resultantStudentList, setOriginalStudentList, setResultantStudentList } = useStudent();
 
     useEffect(() => {
         if(!initialLoad) {
@@ -32,7 +31,9 @@ const StudentList = () => {
                     const responseClone = response.clone();
                     const responseText = await responseClone.text();
                     const objects: Student[] = JSON.parse(responseText);
-                    convertResponseToStudentList(objects, setTotalStudentList);
+                    const studentList = convertResponseToStudentList(objects);
+                    setOriginalStudentList(studentList);
+                    setResultantStudentList(studentList);
                 }
             } catch (error: unknown) {
                 catchError(error, "error.message: ", "Unknown error caught at /student-list/page.tsx catch statement.");
@@ -43,7 +44,7 @@ const StudentList = () => {
         }
 
         fetchStudents();
-    });
+    }, [initialLoad, setOriginalStudentList, setResultantStudentList]);
 
     if(loading) {
         return (
@@ -58,7 +59,7 @@ const StudentList = () => {
     return (
         <div className="mx-2 py-2 flex flex-col">
             <Filter />
-            <Table columnHeaders={columnHeaders} tableData={totalStudentList}></Table>
+            <Table columnHeaders={columnHeaders} tableData={resultantStudentList}></Table>
         </div>
     )
 }
