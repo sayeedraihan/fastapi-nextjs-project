@@ -23,7 +23,7 @@ const TableRow = ({columnHeaders, rowData, onDeleteClick, index}: TableRowProps)
 
     if(columnHeaders && columnHeaders.length > 0) {
         return (
-            <tr className="my-4 text-fontcolor">
+            <tr className="my-4 text-textprimary">
                 {columnHeaders?.map((header) => (
                     <HeadCell key={header} text={header} />
                 ))}
@@ -32,11 +32,11 @@ const TableRow = ({columnHeaders, rowData, onDeleteClick, index}: TableRowProps)
     } else if(rowData) {
         const studentId = rowData.id;
         return (
-            <tr className={`text-fontcolor hover:bg-secondary hover:text-fontcolor`}>
+            <tr className={`text-textprimary hover:bg-surface/10 hover:text-textprimary`}>
                 <td
                     onClick={() => {handleTableRowClickEvent(studentId, setSelectedStudent, router)}} 
                     className={`
-                        border-bordercolor border-2 
+                        border-subtle border-2 
                         ${"hover:cursor-pointer"}
                     `}
                 >
@@ -51,15 +51,15 @@ const TableRow = ({columnHeaders, rowData, onDeleteClick, index}: TableRowProps)
                         clickable={lowerIndex < 2}
                     />
                 ))}
-                <td className="border-bordercolor border-2">
+                <td className="border-subtle border-2">
                     <button 
                         onClick={() => onDeleteClick && onDeleteClick(rowData.id.toString())} 
                         className="
                             py-1 px-2  
                             mx-1 my-1 align-middle
-                            bg-secondary hover:bg-bordercolor rounded-md shadow-md 
-                            text-fontcolor font-bold 
-                            focus:outline-none focus:ring-1 focus:ring-fontcolor focus:ring-opacity-75
+                            bg-destructive hover:bg-destructive/90 rounded-md shadow-md 
+                            text-textprimary font-bold 
+                            focus:outline-none focus:ring-1 focus:ring-destructive focus:ring-opacity-75
                             transition duration-150 ease-in-out
                         "
                     >
@@ -70,9 +70,9 @@ const TableRow = ({columnHeaders, rowData, onDeleteClick, index}: TableRowProps)
                         className="
                             py-1 px-4  
                             mx-1 my-1 align-middle
-                            bg-secondary hover:bg-bordercolor rounded-lg shadow-md 
-                            text-fontcolor font-bold hover:text-secondary
-                            focus:outline-none focus:ring-1 focus:ring-fontcolor focus:ring-opacity-75
+                            bg-primary hover:bg-primary/90 rounded-lg shadow-md 
+                            text-textprimary font-bold hover:text-textprimary
+                            focus:outline-none focus:ring-1 focus:ring-primary focus:ring-opacity-75
                             transition duration-150 ease-in-out
                         "
                     >

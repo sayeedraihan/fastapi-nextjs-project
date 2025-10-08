@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { Course, Performance } from "../../../students";
 import { useSelectedStudent } from "../../../../contexts/student-context";
-import styles from "../../../page.module.css";
+
 import { useModal } from "../../../../hooks/modal/useModal";
 import Modal from "../../../../custom-components/modal/modal";
+import { catchError } from "@/app/routes/route_utils";
 
 // This component displays and manages the performance records for a selected student.
 const PerformancePage = () => {
@@ -43,9 +44,13 @@ const PerformancePage = () => {
                 const data = await response.json();
                 setCourses(data.courses);
                 setPerformances(data.performances);
-                setOriginalPerformances(data.performances); // Store original state for cancel functionality
-            } catch (err: any) {
-                setError(err.message);
+                setOriginalPerformances(data.performances as Performance[]); // Store original state for cancel functionality
+            } catch (error: unknown) {
+                catchError(
+                    error, 
+                    "Error caught during get-courses-and-student-performance. Reason: ", 
+                    "Error caught during get-courses-and-student-performance"
+                );
             } finally {
                 setLoading(false);
             }
@@ -70,9 +75,20 @@ const PerformancePage = () => {
     };
     
     // Updates the state for a specific field in a row.
-    const handleInputChange = (index: number, field: keyof Performance, value: string | number) => {
-        const newPerformances = [...performances];
-        (newPerformances[index] as any)[field] = value;
+    const handleInputChange = <K extends keyof Performance>(
+        index: number,
+        field: K,
+        value: Performance[K]
+    ) => {
+        const newPerformances = [...performances]; // 'performances' is your state array
+        
+        // Create a new object for the updated item to ensure immutability
+        const updatedPerformance = {
+            ...newPerformances[index],
+            [field]: value
+        };
+        
+        newPerformances[index] = updatedPerformance;
         setPerformances(newPerformances);
     };
 
@@ -104,14 +120,14 @@ const PerformancePage = () => {
                 throw new Error(errorData.detail || 'Failed to save performance');
             }
 
-            const savedPerformance = await response.json();
+            const savedPerformance: Performance = await response.json();
             const newPerformances = [...performances];
             newPerformances[index] = savedPerformance;
             setPerformances(newPerformances);
             setOriginalPerformances(newPerformances); // Update original state
             setEditingRowIndex(null); // Exit editing mode
-        } catch (error: any) {
-            showModal(error.message);
+        } catch (error: unknown) {
+            catchError(error, "Error caught from client side add-performance. Reason: ", "Error caught from client side add-performance.");
         }
     };
 
@@ -136,8 +152,8 @@ const PerformancePage = () => {
             const newPerformances = performances.filter((_, i) => i !== index);
             setPerformances(newPerformances);
             setOriginalPerformances(newPerformances);
-        } catch (error: any) {
-            showModal(error.message);
+        } catch (error: unknown) {
+            catchError(error, "Failed to delete Performance: ", "Failed to delete Performance Record for unknown reason.");
         }
     };
 
@@ -163,7 +179,7 @@ const PerformancePage = () => {
 
     // Render error state
     if (error) {
-        return <div className={`p-4 text-center ${styles.errorText}`}>Error: {error}</div>;
+        return <div className={`p-4 text-center text-destructive`}>Error: {error}</div>;
     }
 
     // Main component render
@@ -171,17 +187,17 @@ const PerformancePage = () => {
         <div className="p-4">
             <Modal isOpen={isOpen} onClose={hideModal} message={message} />
             <div className="flex justify-between items-center mb-4">
-                <h1 className="text-xl font-bold text-fontcolor">Student Performance</h1>
+                <h1 className="text-xl font-bold text-textprimary">Student Performance</h1>
                 <button
                     onClick={handleAddRow}
-                    className="py-2 px-4 bg-bordercolor hover:bg-secondary rounded-lg shadow-md text-fontcolor font-bold focus:outline-none focus:ring-1 focus:ring-fontcolor transition duration-150 ease-in-out"
+                    className="py-2 px-4 bg-primary hover:bg-primary/90 rounded-lg shadow-md text-textprimary font-bold focus:outline-none focus:ring-1 focus:ring-primary transition duration-150 ease-in-out"
                 >
                     + Add Performance
                 </button>
             </div>
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                    <thead className="text-xs uppercase bg-secondary">
+                    <thead className="text-xs uppercase bg-surface">
                         <tr>
                             <th className="px-6 py-3">Course Name</th>
                             <th className="px-6 py-3">Description</th>
@@ -199,13 +215,13 @@ const PerformancePage = () => {
                             const isEditing = editingRowIndex === index;
 
                             return (
-                                <tr key={index} className="border-b border-bordercolor hover:bg-secondary">
+                                <tr key={index} className="border-b border-subtle hover:bg-surface/10">
                                     <td className="px-6 py-4">
                                         {isEditing ? (
                                             <select
                                                 value={p.course_id}
                                                 onChange={(e) => handleCourseChange(index, parseInt(e.target.value))}
-                                                className="w-full p-1 border-bordercolor border-2 rounded-md bg-secondary focus:outline-none focus:ring-1 focus:ring-fontcolor"
+                                                className="w-full p-1 border-subtle border-2 rounded-md bg-surface focus:outline-none focus:ring-1 focus:ring-primary"
                                             >
                                                 <option value={0} disabled>--Select--</option>
                                                 {courses.map(c => (
@@ -231,7 +247,7 @@ const PerformancePage = () => {
                                                             handleInputChange(index, field as keyof Performance, numericValue);
                                                         }
                                                     }}
-                                                    className="w-20 p-1 border-bordercolor border-2 rounded-md bg-secondary no-arrows focus:outline-none focus:ring-1 focus:ring-fontcolor"
+                                                    className="w-20 p-1 border-subtle border-2 rounded-md bg-surface no-arrows focus:outline-none focus:ring-1 focus:ring-primary"
                                                 />
                                             ) : (
                                                 p[field as keyof Performance]
@@ -239,12 +255,12 @@ const PerformancePage = () => {
                                         </td>
                                     ))}
                                     <td className="px-6 py-4 text-center">
-                                        <button onClick={() => handleEdit(index)} disabled={isEditing || !p.course_id} className="font-medium text-blue-500 hover:underline disabled:text-gray-400 disabled:no-underline">Edit</button>
-                                        <button onClick={() => handleDelete(index)} disabled={isEditing || !p.course_id} className="font-medium text-red-500 hover:underline ml-4 disabled:text-gray-400 disabled:no-underline">Delete</button>
+                                        <button onClick={() => handleEdit(index)} disabled={isEditing || !p.course_id} className="font-medium text-primary hover:underline disabled:text-disabled disabled:no-underline">Edit</button>
+                                        <button onClick={() => handleDelete(index)} disabled={isEditing || !p.course_id} className="font-medium text-destructive hover:underline ml-4 disabled:text-disabled disabled:no-underline">Delete</button>
                                     </td>
                                     <td className="px-6 py-4 text-center">
-                                        <button onClick={() => handleSave(index)} disabled={!isEditing} className="font-medium text-green-500 hover:underline disabled:text-gray-400 disabled:no-underline">Save</button>
-                                        <button onClick={() => handleCancel(index)} disabled={!isEditing} className="font-medium text-gray-500 hover:underline ml-4 disabled:text-gray-400 disabled:no-underline">Cancel</button>
+                                        <button onClick={() => handleSave(index)} disabled={!isEditing} className="font-medium text-success hover:underline disabled:text-disabled disabled:no-underline">Save</button>
+                                        <button onClick={() => handleCancel(index)} disabled={!isEditing} className="font-medium text-textsecondary hover:underline ml-4 disabled:text-disabled disabled:no-underline">Cancel</button>
                                     </td>
                                 </tr>
                             );

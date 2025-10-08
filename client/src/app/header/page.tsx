@@ -30,11 +30,11 @@ const Header = () => {
                 mr-2
                 h-12 w-full 
                 py-8
-                bg-primaryorbackground shadow-lg 
-                border-bordercolor border-b-2
+                bg-surface shadow-lg 
+                border-subtle border-b-2
                 flex items-center justify-center 
                 gap-x-4 sm:gap-x-6
-                font-bold text-fontcolor 
+                font-bold text-textprimary 
             "
         >
             {linkRefs.map((linkRef) => {
@@ -44,8 +44,8 @@ const Header = () => {
 
                     // Define classes for better readability
                 const baseLinkClasses = "my-4 py-2 px-4 rounded-lg transition-colors duration-200 text-sm sm:text-base";
-                const activeLinkClasses = "bg-bordercolor text-fontcolor font-semibold shadow-inner ";
-                const inactiveLinkClasses = "text-fontcolor hover:bg-secondary hover:text-fontcolor";
+                const activeLinkClasses = "bg-primary text-white font-semibold shadow-inner ";
+                const inactiveLinkClasses = "text-textprimary hover:bg-primary/10";
 
                 return (
                     <Link 

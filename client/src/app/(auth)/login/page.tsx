@@ -88,9 +88,9 @@ const Login = () => {
                 className="
                     py-2 px-4 
                     mx-2 
-                    bg-bordercolor hover:bg-secondary rounded-lg shadow-md 
-                    text-fontcolor font-bold 
-                    focus:outline-none focus:ring-1 focus:ring-fontcolor focus:ring-opacity-75
+                    bg-primary hover:bg-primary/90 rounded-lg shadow-md 
+                    text-textprimary font-bold 
+                    focus:outline-none focus:ring-1 focus:ring-primary focus:ring-opacity-75
                     transition duration-150 ease-in-out
                 "
             >

@@ -3,7 +3,7 @@
 import { useSelectedStudent } from "@/app/contexts/student-context";
 import { useEffect, useRef, useState } from "react"
 import { Student, StudentBase } from "../students";
-import styles from "../page.module.css"
+
 import { useStudentList } from "@/app/contexts/student-list-context";
 import { useUtilsObject } from "@/app/contexts/utils_context";
 import { useModal } from "@/app/hooks/modal/useModal";
@@ -132,15 +132,15 @@ const CreateStudent = () => {
 
     if(loading) {
         return (
-            <main className={styles.container}>
-                {error && <p className={styles.errorText}>Error: {error} </p>}
-                {!error && <p className={styles.errorText}>Loading...</p>}
+            <main className="flex flex-col items-center">
+                {error && <p className="text-destructive">Error: {error} </p>}
+                {!error && <p className="text-textprimary">Loading...</p>}
             </main>
         );
     }
 
     if(error) {
-        return <main className={styles.container}><p className={styles.errorText}>Error: {error}</p></main>;
+        return <main className="flex flex-col items-center"><p className="text-destructive">Error: {error}</p></main>;
     }
 
     return (
@@ -167,9 +167,9 @@ const CreateStudent = () => {
                             ml-1 
                             p-1 
                             w-60 
-                            border-bordercolor border-2 rounded-md 
-                            focus:outline-none focus:ring-1 focus:ring-fontcolor 
-                            bg-secondary 
+                            border-subtle border-2 rounded-md 
+                            focus:outline-none focus:ring-1 focus:ring-primary 
+                            bg-surface 
                         "
                     />
                 </div>
@@ -186,9 +186,9 @@ const CreateStudent = () => {
                             ml-1 
                             p-1 
                             w-60 
-                            border-bordercolor border-2 rounded-md 
-                            focus:outline-none focus:ring-1 focus:ring-fontcolor 
-                            bg-secondary 
+                            border-subtle border-2 rounded-md 
+                            focus:outline-none focus:ring-1 focus:ring-primary 
+                            bg-surface 
                         "
                     />
                 </div>
@@ -204,9 +204,9 @@ const CreateStudent = () => {
                             ml-1 
                             p-1 
                             w-60 
-                            border-bordercolor border-2 rounded-md 
-                            focus:outline-none focus:ring-1 focus:ring-fontcolor 
-                            bg-secondary 
+                            border-subtle border-2 rounded-md 
+                            focus:outline-none focus:ring-1 focus:ring-primary 
+                            bg-surface 
                         "
                         >
                         <option value="" disabled>--Please choose an option--</option>
@@ -233,9 +233,9 @@ const CreateStudent = () => {
                             ml-1 
                             p-1 
                             w-60 
-                            border-bordercolor border-2 rounded-md 
-                            focus:outline-none focus:ring-1 focus:ring-fontcolor 
-                            bg-secondary 
+                            border-subtle border-2 rounded-md 
+                            focus:outline-none focus:ring-1 focus:ring-primary 
+                            bg-surface 
                         "
                     />
                 </div>
@@ -251,9 +251,9 @@ const CreateStudent = () => {
                             ml-1 
                             p-1 
                             w-60 
-                            border-bordercolor border-2 rounded-md 
-                            focus:outline-none focus:ring-1 focus:ring-fontcolor 
-                            bg-secondary 
+                            border-subtle border-2 rounded-md 
+                            focus:outline-none focus:ring-1 focus:ring-primary 
+                            bg-surface 
                         "
                     >
                         <option value="" disabled>--Please choose an option--</option>
@@ -274,9 +274,9 @@ const CreateStudent = () => {
                     className="
                         py-2 px-2 
                         mx-2 
-                        bg-bordercolor hover:bg-secondary rounded-lg shadow-md 
-                        text-fontcolor font-bold 
-                        focus:outline-none focus:ring-1 focus:ring-fontcolor focus:ring-opacity-75
+                        bg-primary hover:bg-primary/90 rounded-lg shadow-md 
+                        text-textprimary font-bold 
+                        focus:outline-none focus:ring-1 focus:ring-primary focus:ring-opacity-75
                         transition duration-150 ease-in-out
                     "
                 >

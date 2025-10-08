@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Student } from "../../contexts/student-context"
-import styles from "../page.module.css"
+
 import Table from "./table/table"
 import { convertResponseToStudentList } from "../students"
 import { useStudentList } from "@/app/contexts/student-list-context"
@@ -47,9 +47,9 @@ const StudentList = () => {
 
     if(loading) {
         return (
-            <main className={styles.container}>
-                {error && <p className={styles.errorText}>Error: {error} </p>}
-                {!error && <p className={styles.errorText}>Loading...</p>}
+            <main className="flex flex-col items-center">
+                {error && <p className="text-destructive">Error: {error} </p>}
+                {!error && <p className="text-textprimary">Loading...</p>}
             </main>
         );
     }

@@ -8,13 +8,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primaryorbackground: '#191919', // '#e5ddc8',
-        secondary: '#750E21', // '#01949a',
-        fontcolor: '#BED754', // '#db1f48',
-        clifford: "#dc2f35ff",
-        yellowgreen: "#9acd32",
-        bordercolor: "#E3651D", // "#004369",
-        shadowcolor: "#00000080"
+        // "Nordic Night" - A modern, eye-friendly dark theme.
+        background: '#0F172A', // Deep Dark Blue (Slate 900)
+        surface: '#1E293B',    // Dark Blue-Gray (Slate 800)
+        primary: '#FBBF24',    // Vibrant Amber (Amber 400) for high contrast
+        destructive: '#F43F5E',// Soft Red (Rose 500)
+        success: '#14B8A6',    // Muted Green (Teal 500)
+        subtle: '#334155',     // Muted Blue-Gray for borders (Slate 700)
+        textprimary: '#CBD5E1',   // Soft White for primary text (Slate 300)
+        textsecondary: '#64748B', // Muted Gray for secondary text (Slate 500)
       }
     },
   },

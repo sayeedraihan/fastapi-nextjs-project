@@ -3,12 +3,11 @@
 import { Student, useSelectedStudent } from "@/app/contexts/student-context";
 import React, { JSX, useEffect, useRef, useState } from "react"
 import { fetchStudentById, StudentUpdateResponseParams } from "../../students";
-import styles from "../../page.module.css";
+
 import { useUtilsObject } from "@/app/contexts/utils_context";
 import { useStudentList } from "@/app/contexts/student-list-context";
 import { useModal } from "@/app/hooks/modal/useModal";
 import Modal from "@/app/custom-components/modal/modal";
-import Link from "next/link";
 import { useRouter } from 'next/navigation';
 
 export type StudentDetailsParams = {
@@ -180,15 +179,15 @@ const StudentDetails = ({
 
     if(loading) {
         return (
-            <main className={styles.container}>
-                {error && <p className={styles.errorText}>Error: {error} </p>}
-                {!error && <p className={styles.errorText}>Loading...</p>}
+            <main className="flex flex-col items-center">
+                {error && <p className="text-destructive">Error: {error} </p>}
+                {!error && <p className="text-textprimary">Loading...</p>}
             </main>
         );
     }
 
     if(error) {
-        return <main className={styles.container}><p className={styles.errorText}>Error: {error}</p></main>;
+        return <main className="flex flex-col items-center"><p className="text-destructive">Error: {error}</p></main>;
     }
 
     // 3. Render using the local 'student' state to ensure the full, correct data is displayed.
@@ -201,7 +200,7 @@ const StudentDetails = ({
             <Modal isOpen={isOpen} onClose={hideModal} message={warningMessage} />
             {/* Link to performance page */}
             <div className="flex justify-center my-4">
-                <button onClick={handleViewPerformanceClick} className="text-blue-500 hover:underline">
+                <button onClick={handleViewPerformanceClick} className="text-primary hover:underline">
                     View Performance
                 </button>
             </div>
@@ -222,9 +221,9 @@ const StudentDetails = ({
                             ml-1 
                             p-1 
                             w-60 
-                            border-bordercolor border-2 rounded-md 
-                            focus:outline-none focus:ring-1 focus:ring-fontcolor 
-                            bg-secondary 
+                            border-subtle border-2 rounded-md 
+                            focus:outline-none focus:ring-1 focus:ring-primary 
+                            bg-surface 
                         "
                     />
                 </div>
@@ -241,9 +240,9 @@ const StudentDetails = ({
                             ml-1 
                             p-1 
                             w-60 
-                            border-bordercolor border-2 rounded-md 
-                            focus:outline-none focus:ring-1 focus:ring-fontcolor 
-                            bg-secondary 
+                            border-subtle border-2 rounded-md 
+                            focus:outline-none focus:ring-1 focus:ring-primary 
+                            bg-surface 
                         "
                     />
                 </div>
@@ -259,9 +258,9 @@ const StudentDetails = ({
                             ml-1 
                             p-1 
                             w-60 
-                            border-bordercolor border-2 rounded-md 
-                            focus:outline-none focus:ring-1 focus:ring-fontcolor 
-                            bg-secondary 
+                            border-subtle border-2 rounded-md 
+                            focus:outline-none focus:ring-1 focus:ring-primary 
+                            bg-surface 
                         "
                         >
                         <option value="" disabled>--Please choose an option--</option>
@@ -288,9 +287,9 @@ const StudentDetails = ({
                             ml-1 
                             p-1 
                             w-60 
-                            border-bordercolor border-2 rounded-md 
-                            focus:outline-none focus:ring-1 focus:ring-fontcolor 
-                            bg-secondary 
+                            border-subtle border-2 rounded-md 
+                            focus:outline-none focus:ring-1 focus:ring-primary 
+                            bg-surface 
                         "
                     />
                 </div>
@@ -306,9 +305,9 @@ const StudentDetails = ({
                             ml-1 
                             p-1 
                             w-60 
-                            border-bordercolor border-2 rounded-md 
-                            focus:outline-none focus:ring-1 focus:ring-fontcolor 
-                            bg-secondary 
+                            border-subtle border-2 rounded-md 
+                            focus:outline-none focus:ring-1 focus:ring-primary 
+                            bg-surface 
                         "
                     >
                         <option value="" disabled>--Please choose an option--</option>
@@ -329,9 +328,9 @@ const StudentDetails = ({
                     className="
                         py-2 px-2 
                         mx-2 
-                        bg-bordercolor hover:bg-secondary rounded-lg shadow-md 
-                        text-fontcolor font-bold 
-                        focus:outline-none focus:ring-1 focus:ring-fontcolor focus:ring-opacity-75
+                        bg-primary hover:bg-primary/90 rounded-lg shadow-md 
+                        text-textprimary font-bold 
+                        focus:outline-none focus:ring-1 focus:ring-primary focus:ring-opacity-75
                         transition duration-150 ease-in-out
                     "
                 >
