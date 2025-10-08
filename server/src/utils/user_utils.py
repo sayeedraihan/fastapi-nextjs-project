@@ -10,8 +10,8 @@ from sqlmodel import Session
 from starlette import status
 from starlette.requests import Request
 
-from src.database.db import get_session
-from src.database.user.read_user import select_users_by_username, select_users_by_raw_username
+from src.app import get_session
+from src.service.user.user_service import UserService
 from src.models.token import TokenData
 from src.models.user import User
 
@@ -23,6 +23,8 @@ SECRET_KEY = "672651c34f6ed00bc275928112ea76f413bec7896e71814ff5f2e64d7c204ea5"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+user_service = UserService()
 
 # verify if a received password matches with the hashed password
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -42,7 +44,7 @@ def get_user(db, username: str):
 # authenticate the user
 def authenticate_user(session: Session, request: Request):
     # user = get_user(fake_db, username)
-    user = select_users_by_username(session, request)
+    user = user_service.select_users_by_username(session, request)
     if not user: # user does not exist
         return None
     if not verify_password(request.session.get("password"), user.password): # password did not match
@@ -77,7 +79,7 @@ async def get_current_user(*, session: Session = Depends(get_session), token: An
         token_data = TokenData(username=username)
     except InvalidTokenError:
         raise credentials_exception
-    user = select_users_by_raw_username(session=session, username=token_data.username)
+    user = user_service.select_users_by_raw_username(session=session, username=token_data.username)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -3,7 +3,7 @@ import os
 from fastapi import HTTPException, status, APIRouter
 from sqlmodel import SQLModel
 
-from src.database.db import sqlite_file_name, engine
+from src.app import sqlite_file_name, engine
 from src.routes.base_routes import get_router
 
 router: APIRouter = get_router()

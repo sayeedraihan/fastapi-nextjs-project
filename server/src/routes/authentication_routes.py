@@ -7,7 +7,7 @@ from sqlmodel import Session
 from starlette import status
 from starlette.requests import Request
 
-from src.database.db import get_session
+from src.app import get_session
 from src.models.token import LoginResponse, Token
 from src.models.user import User
 from src.routes.base_routes import get_router
