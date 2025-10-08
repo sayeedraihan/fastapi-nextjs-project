@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Course, Performance } from "../../../students";
-import { useSelectedStudent } from "../../../../contexts/student-context";
+import { useStudent } from "../../../../contexts/student-context";
 
 import { useModal } from "../../../../hooks/modal/useModal";
 import Modal from "../../../../custom-components/modal/modal";
@@ -11,7 +11,7 @@ import { catchError } from "@/app/routes/route_utils";
 // This component displays and manages the performance records for a selected student.
 const PerformancePage = () => {
     // State management for student, courses, performances, loading, and errors.
-    const { selectedStudent } = useSelectedStudent();
+    const { selectedStudent } = useStudent();
     const [courses, setCourses] = useState<Course[]>([]);
     const [performances, setPerformances] = useState<Performance[]>([]);
     const [originalPerformances, setOriginalPerformances] = useState<Performance[]>([]);

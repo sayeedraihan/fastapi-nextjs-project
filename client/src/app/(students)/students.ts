@@ -52,8 +52,7 @@ type StudentUpdateResponseParams = {
     response_message: string;
 }
 
-const convertResponseToStudentList = (objects: Student[], 
-    setTotalStudentList: (studentList: Student[]) => void) => {
+const convertResponseToStudentList = (objects: Student[]) => {
 
     const studentList: Student[] = [];
     objects.forEach((obj: Student) => {
@@ -67,7 +66,7 @@ const convertResponseToStudentList = (objects: Student[],
         };
         studentList.push(student)
     })
-    setTotalStudentList(studentList);
+    return studentList;
 }
 
 const convertResponseToStudent = (objects: Student[]) => {

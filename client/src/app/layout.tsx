@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "./header/page";
 import { StudentContextProvider } from "./contexts/student-context";
-import { StudentListContextProvider } from "./contexts/student-list-context";
 import Footer from "./footer/page";
 import { UtilsObjectContextProvider } from "./contexts/utils_context";
 
@@ -20,8 +19,7 @@ export default function RootLayout({
 		<html lang="en">
 			<body className="flex flex-row justify-center items-center h-screen bg-background text-textprimary">
 				<UtilsObjectContextProvider>
-					<StudentListContextProvider>
-						<StudentContextProvider>
+					<StudentContextProvider>
 							<div>
 								<Header />
 								<div className={`bg-surface h-2/3 overflow-y-auto`}>
@@ -30,7 +28,6 @@ export default function RootLayout({
 								<Footer />
 							</div>
 						</StudentContextProvider>
-					</StudentListContextProvider>
 				</UtilsObjectContextProvider>
 			</body>
 		</html>

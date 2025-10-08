@@ -1,10 +1,9 @@
 import Modal from "@/app/custom-components/modal/modal";
-import { Student } from "../../../contexts/student-context";
+import { Student, useStudent } from "../../../contexts/student-context";
 import TableBody from "./body/body"
 import TableHeader from "./header/header"
 
 import { useModal } from "@/app/hooks/modal/useModal";
-import { useStudentList } from "@/app/contexts/student-list-context";
 import { useState } from "react";
 import { StudentDeleteParams } from "./row/row";
 
@@ -14,7 +13,7 @@ export type TableProps = {
 }
 
 const Table = ({columnHeaders, tableData}: TableProps) => {
-    const { totalStudentList, setTotalStudentList } = useStudentList();
+    const { originalStudentList, setOriginalStudentList, resultantStudentList, setResultantStudentList } = useStudent();
     const { 
         isOpen: isConfirmOpen, 
         showModal: showConfirmModal, 
@@ -48,7 +47,8 @@ const Table = ({columnHeaders, tableData}: TableProps) => {
             if(!response.ok) {
                 throw new Error("Failed to delete student with ID: " + id + ". Reason: " + response.body);
             }
-            setTotalStudentList(totalStudentList.filter(student => student.id.toString() !== id));
+            setOriginalStudentList(originalStudentList.filter(student => student.id.toString() !== id));
+            setResultantStudentList(resultantStudentList.filter(student => student.id.toString() !== id));
             showSuccessModal("Record deleted successfully.");
         } catch(error: unknown) {
             if(error instanceof Error) {

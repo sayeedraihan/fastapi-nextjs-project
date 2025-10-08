@@ -1,11 +1,11 @@
 "use client"
 
-import { Student, useSelectedStudent } from "@/app/contexts/student-context";
+import { Student, useStudent } from "@/app/contexts/student-context";
 import React, { JSX, useEffect, useRef, useState } from "react"
 import { fetchStudentById, StudentUpdateResponseParams } from "../../students";
 
 import { useUtilsObject } from "@/app/contexts/utils_context";
-import { useStudentList } from "@/app/contexts/student-list-context";
+
 import { useModal } from "@/app/hooks/modal/useModal";
 import Modal from "@/app/custom-components/modal/modal";
 import { useRouter } from 'next/navigation';
@@ -29,8 +29,7 @@ const StudentDetails = ({
     const [ updatedStudent, setUpdatedStudent ] = useState<Student>( { id: -1 } );
     const [ isUpdateButtonDisabled, setUpdateButtonDisabled ] = useState<boolean>(true);
     const [ warningMessage, setWarningMessage ] = useState("");
-    const { totalStudentList } = useStudentList();
-    const { selectedStudent, setSelectedStudent } = useSelectedStudent();
+    const { originalStudentList, selectedStudent, setSelectedStudent } = useStudent();
     const { utilsObject } = useUtilsObject();
     const { isOpen, showModal, hideModal } = useModal();
     const studentNameInputRef = useRef<HTMLInputElement>(null);
@@ -51,8 +50,8 @@ const StudentDetails = ({
             setWarningMessage("The Roll Number is invalid. Please re-insert the value");
             return true;
         }
-        for(let i = 0; i < totalStudentList.length; i++) {
-            if(totalStudentList[i].roll == newRoll && student.id !== totalStudentList[i].id) {
+        for(let i = 0; i < originalStudentList.length; i++) {
+            if(originalStudentList[i].roll == newRoll && student.id !== originalStudentList[i].id) {
                 setWarningMessage("The Roll Number already exists in the Database. Please change the Roll.");
                 return true;
             }

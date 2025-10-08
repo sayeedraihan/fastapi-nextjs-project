@@ -1,10 +1,10 @@
 "use client"
 
-import { useSelectedStudent } from "@/app/contexts/student-context";
+import { useStudent } from "@/app/contexts/student-context";
 import { useEffect, useRef, useState } from "react"
 import { Student, StudentBase } from "../students";
 
-import { useStudentList } from "@/app/contexts/student-list-context";
+
 import { useUtilsObject } from "@/app/contexts/utils_context";
 import { useModal } from "@/app/hooks/modal/useModal";
 import Modal from "@/app/custom-components/modal/modal";
@@ -22,8 +22,7 @@ const CreateStudent = () => {
     const [ isCreateButtonDisabled, setCreateButtonDisabled ] = useState<boolean>(true);
     const [ newStudent, setNewStudent ] = useState<StudentBase | null>( null );
     const [ warningMessage, setWarningMessage ] = useState("");
-    const { totalStudentList } = useStudentList();
-    const { setSelectedStudent } = useSelectedStudent();
+    const { originalStudentList, setSelectedStudent } = useStudent();
     const { utilsObject } = useUtilsObject();
     const { isOpen, showModal, hideModal } = useModal();
 
@@ -42,8 +41,8 @@ const CreateStudent = () => {
             setWarningMessage("The Roll Number is invalid. Please re-insert the value");
             return true;
         }
-        for(let i = 0; i < totalStudentList.length; i++) {
-            if(totalStudentList[i].roll == newRoll) {
+        for(let i = 0; i < originalStudentList.length; i++) {
+            if(originalStudentList[i].roll == newRoll) {
                 setWarningMessage("The Roll Number already exists in the Database. Please change the Roll.");
                 return true;
             }
