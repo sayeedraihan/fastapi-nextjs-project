@@ -1,5 +1,5 @@
 from datetime import timedelta, datetime, timezone
-from typing import Annotated, MutableMapping
+from typing import Annotated
 
 import jwt
 from fastapi import Depends, HTTPException

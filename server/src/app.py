@@ -8,9 +8,6 @@ from sqlmodel import SQLModel, create_engine, Session
 from starlette.middleware.sessions import SessionMiddleware
 
 from src.models.user import User
-from src.models.course import Course
-from src.models.performance import Performance
-from src.models.student import Student
 from src.routes import student_routes, db_routes, authentication_routes, user_routes, performance_routes
 from src.templating import template_Init
 from src.utils.user_utils import get_password_hash
