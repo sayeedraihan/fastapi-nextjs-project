@@ -47,6 +47,17 @@ type Performance = {
     in_course: number;
 }
 
+type UserBase = {
+    username: string;
+    email: string | null;
+    full_name: string | null;
+    disabled: boolean | null;
+    password: string | null;
+    role: string | null;    
+}
+
+type User = { id: number } & UserBase;
+
 type StudentUpdateResponseParams = {
     updated_student: string;
     response_message: string;
