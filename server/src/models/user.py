@@ -9,6 +9,7 @@ class UserBase(SQLModel):
     full_name: str | None = None
     disabled: bool | None = False
     password: str = None
+    role: str = None
 
 class User(UserBase, table=True):
     id: int = Field(None, primary_key=True)
