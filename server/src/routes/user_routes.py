@@ -21,7 +21,8 @@ def add_admin_user(*, session: Session = Depends(get_session), request: Request)
         username="admin",
         email="admin@example.com",
         full_name="System Administrator",
-        password="$2a$12$SW5CVGYA8fjUJKPKqEQtHOZLsDXDgAGI1Prb/EoAVKyNt4pxL8trW"
+        password="$2a$12$SW5CVGYA8fjUJKPKqEQtHOZLsDXDgAGI1Prb/EoAVKyNt4pxL8trW",
+        role="A"
     )
     request.session["user_new"] = dict(user)
     request.session["username"] = user.username
@@ -38,6 +39,7 @@ def add_new_user(*, session: Session = Depends(get_session), user_new: Optional[
     request.session["user_new"] = dict(user)
     request.session["username"] = user.username
     request.session["password"] = user.password
+    request.session["role"] = user.role
     user = user_service.add_user(session, request)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
