@@ -1,30 +1,29 @@
 from datetime import timedelta
 from typing import Annotated, Dict
 
-from fastapi import Depends, APIRouter, HTTPException
+from fastapi import Depends, APIRouter, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
 from starlette import status
-from starlette.requests import Request
 
-from src.app import get_session
-from src.models.token import LoginResponse, Token
-from src.models.user import User
+from src.models.request_response_models import LoginResponse
+from src.models.db_models import Student, User
+from src.service.student_service import student_service
+from src.db_init import get_session
+from src.models.token import Token
 from src.routes.base_routes import get_router
+from src.utils.authentication_utils import ACCESS_TOKEN_EXPIRE_MINUTES
 from src.utils.base_utils import Level, Medium, Field
 from src.utils.user_utils import get_current_active_user, \
-    authenticate_user, ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
+    authenticate_user, create_access_token
 
 router: APIRouter = get_router()
 
-
 @router.post("/get-token")
-async def get_token(*, session: Session = Depends(get_session),
-                    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-                    request: Request) -> LoginResponse:
-    request.session["username"] = form_data.username
-    request.session["password"] = form_data.password
-    user: User = authenticate_user(session, request)
+def get_token(*, session: Session = Depends(get_session), #loading_fix
+                    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], #loading_fix
+                    request: Request) -> LoginResponse: #loading_fix
+    user: User = authenticate_user(session, form_data)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -32,12 +31,23 @@ async def get_token(*, session: Session = Depends(get_session),
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user.username, "role": user.role}, expires_delta=access_token_expires)
     token: Token = Token(access_token=access_token, token_type="bearer")
+
+    student_details: Student | None = None
+    if user.role == "S":
+        student_details = student_service.get_student_details_by_user_id(session, user.id)
     levels_enum: list[Dict[str, str]] = [ { level.name: level.value } for level in Level]
     mediums_enum: list[Dict[str, str]] = [ { medium.name: medium.value } for medium in Medium]
     fields: list[Dict[str, str]] = [ { field.name: field.value } for field in Field]
-    login_response: LoginResponse = LoginResponse(token = token, levels = levels_enum, mediums = mediums_enum, fields = fields)
+    login_response: LoginResponse = LoginResponse(
+        token = token, 
+        levels = levels_enum, 
+        mediums = mediums_enum, 
+        fields = fields,
+        student = student_details,
+        role = user.role
+    )
     return login_response
 
 @router.get("/users/me", response_model=User)

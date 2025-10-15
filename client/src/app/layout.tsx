@@ -4,6 +4,7 @@ import Header from "./header/page";
 import { StudentContextProvider } from "./contexts/student-context";
 import Footer from "./footer/page";
 import { UtilsObjectContextProvider } from "./contexts/utils_context";
+import { AuthContextProvider } from "./contexts/auth-context";
 
 export const metadata: Metadata = {
 	title: "Create Next App",
@@ -16,19 +17,21 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
-			<body className="flex flex-row justify-center items-center h-screen bg-background text-textprimary">
-				<UtilsObjectContextProvider>
-					<StudentContextProvider>
-							<div>
-								<Header />
-								<div className={`bg-surface h-2/3 overflow-y-auto`}>
-									{children}
+		<html lang="en" className="h-full">
+			<body className="flex flex-row justify-center items-center h-full bg-background text-textprimary">
+				<AuthContextProvider>
+					<UtilsObjectContextProvider>
+						<StudentContextProvider>
+								<div className="flex flex-col h-full py-5 w-full max-w-7xl">
+									<Header />
+									<div className={`bg-surface flex-grow overflow-y-auto`}>
+										{children}
+									</div>
+									<Footer />
 								</div>
-								<Footer />
-							</div>
-						</StudentContextProvider>
-				</UtilsObjectContextProvider>
+							</StudentContextProvider>
+					</UtilsObjectContextProvider>
+				</AuthContextProvider>
 			</body>
 		</html>
 	);

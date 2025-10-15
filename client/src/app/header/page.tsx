@@ -2,26 +2,32 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useStudent } from "../contexts/student-context"
+import { useAuth } from "../contexts/auth-context"
 
 const Header = () => {
     const pathname = usePathname();
     const { selectedStudent } = useStudent();
+    const { role } = useAuth();
     const linkRefs = [
         {
-            linkName: "Home",
-            linkUrl: "/home"
+            linkName: "Dashboard",
+            linkUrl: "/dashboard",
+            role: "AS"
         },
         {
             linkName: "List of Students",
-            linkUrl: "/student-list"
+            linkUrl: "/student-list",
+            role: "A"
         },
         {
             linkName: "Student Details",
-            linkUrl: `/student-details/${selectedStudent.id}`
+            linkUrl: `/student-details/${selectedStudent.id}`,
+            role: "A"
         },
         {
             linkName: "Add New Students",
-            linkUrl: "/create-student"
+            linkUrl: "/create-student",
+            role: "A"
         }
     ]
     return (
@@ -37,7 +43,7 @@ const Header = () => {
                 font-bold text-textprimary 
             "
         >
-            {linkRefs.map((linkRef) => {
+            {linkRefs.filter(linkRef => role && linkRef.role.includes(role)).map((linkRef) => { // gemini
                 const isActive = 
                     pathname === linkRef.linkUrl || 
                     (pathname.startsWith(linkRef.linkUrl) && linkRef.linkUrl !== "./");

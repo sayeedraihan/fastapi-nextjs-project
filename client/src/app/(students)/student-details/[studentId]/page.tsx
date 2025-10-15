@@ -2,7 +2,7 @@
 
 import { Student, useStudent } from "@/app/contexts/student-context";
 import React, { JSX, useEffect, useRef, useState } from "react"
-import { fetchStudentById, StudentUpdateResponseParams } from "../../students";
+import { AddUserRequest, fetchStudentById, StudentUpdateResponseParams } from "../../students";
 
 import { useUtilsObject } from "@/app/contexts/utils_context";
 
@@ -31,12 +31,15 @@ const StudentDetails = ({
     const [ warningMessage, setWarningMessage ] = useState("");
     const { originalStudentList, selectedStudent, setSelectedStudent } = useStudent();
     const { utilsObject } = useUtilsObject();
+    const [isCredentialsModalOpen, setCredentialsModalOpen] = useState(false);
     const { isOpen, showModal, hideModal } = useModal();
     const studentNameInputRef = useRef<HTMLInputElement>(null);
     const studentRollInputRef = useRef<HTMLInputElement>(null);
     const studentLevelSelectRef = useRef<HTMLSelectElement>(null);
     const studentSectionInputRef = useRef<HTMLInputElement>(null);
     const studentMediumSelectRef = useRef<HTMLSelectElement>(null);
+    const usernameInputRef = useRef<HTMLInputElement>(null);
+    const passwordInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
     const resolvedParams = React.use(params);
@@ -176,6 +179,44 @@ const StudentDetails = ({
         }
     }
 
+    const handleUpdateCredentials = async () => {
+        const username = usernameInputRef.current? usernameInputRef.current.value : null;
+        const password = passwordInputRef.current? passwordInputRef.current.value : null;
+
+        if (!username || !password) {
+            showModal("Username and password are required.");
+            return;
+        }
+
+        try {
+            const addUserRequest: AddUserRequest = {
+                username,
+                password,
+                student_id: student.id,
+                role: "S"
+            };
+            const response = await fetch('/routes/update-student-user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(addUserRequest),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to update credentials");
+            }
+
+            showModal("Credentials updated successfully!");
+            setCredentialsModalOpen(false);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                showModal(error.message);
+            } else {
+                showModal("An unknown error occurred.");
+            }
+        }
+    };
+
     if(loading) {
         return (
             <main className="flex flex-col items-center">
@@ -197,6 +238,69 @@ const StudentDetails = ({
     return (
         <div>
             <Modal isOpen={isOpen} onClose={hideModal} message={warningMessage} />
+            {/* Credentials modal */}
+            {isCredentialsModalOpen && (
+                <div className="fixed inset-0 bg-shadowcolor flex justify-center items-center z-50">
+                    <div className="bg-surface text-textprimary p-6 rounded-lg shadow-lg w-full max-w-sm">
+                        <h3 className="text-lg font-bold mb-4">Update Credentials</h3>
+                        <div className="space-y-4">
+                            <div className="flex items-center">
+                                <label htmlFor="username" className="w-24 text-right pr-4">Username:</label>
+                                <input
+                                    id="username"
+                                    type="text"
+                                    ref={usernameInputRef}
+                                    className="
+                                        flex-grow
+                                        p-1
+                                        border-subtle border-2 rounded-md
+                                        focus:outline-none focus:ring-1 focus:ring-primary
+                                        bg-surface
+                                    "
+                                />
+                            </div>
+                            <div className="flex items-center">
+                                <label htmlFor="password" className="w-24 text-right pr-4">Password:</label>
+                                <input
+                                    id="password"
+                                    type="password"
+                                    ref={passwordInputRef}
+                                    className="
+                                        flex-grow
+                                        p-1
+                                        border-subtle border-2 rounded-md
+                                        focus:outline-none focus:ring-1 focus:ring-primary
+                                        bg-surface
+                                    "
+                                />
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-4 mt-6">
+                             <button
+                                onClick={() => setCredentialsModalOpen(false)}
+                                className="
+                                    py-2 px-4
+                                    bg-transparent hover:bg-destructive rounded-lg
+                                    border border-subtle hover:border-transparent
+                                    text-textprimary font-bold hover:text-textprimary
+                                "
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleUpdateCredentials}
+                                className="
+                                    py-2 px-4
+                                    bg-primary hover:bg-primary/90 rounded-lg shadow-md
+                                    text-textprimary font-bold
+                                "
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Link to performance page */}
             <div className="flex justify-center my-4">
                 <button onClick={handleViewPerformanceClick} className="text-primary hover:underline">
@@ -321,20 +425,34 @@ const StudentDetails = ({
                     </select>
                 </div>
                 <br /><br />
-                <button 
-                    onClick={handleUpdateButtonclick} 
-                    disabled={isUpdateButtonDisabled} 
-                    className="
-                        py-2 px-2 
-                        mx-2 
-                        bg-primary hover:bg-primary/90 rounded-lg shadow-md 
-                        text-textprimary font-bold 
-                        focus:outline-none focus:ring-1 focus:ring-primary focus:ring-opacity-75
-                        transition duration-150 ease-in-out
-                    "
-                >
-                    Update Student Data
-                </button>
+                <div className="flex flex-row flex-nowrap justify-center items-center gap-4">
+                    <button 
+                        onClick={handleUpdateButtonclick} 
+                        disabled={isUpdateButtonDisabled} 
+                        className="
+                            py-2 px-2 
+                            mx-2 
+                            bg-primary hover:bg-primary/90 rounded-lg shadow-md 
+                            text-textprimary font-bold 
+                            focus:outline-none focus:ring-1 focus:ring-primary focus:ring-opacity-75
+                            transition duration-150 ease-in-out
+                        "
+                    >
+                        Update Student Data
+                    </button>
+                    <button
+                        onClick={() => setCredentialsModalOpen(true)}
+                        className="
+                            py-2 px-2
+                            bg-primary hover:bg-primary/90 rounded-lg shadow-md
+                            text-textprimary font-bold
+                            focus:outline-none focus:ring-1 focus:ring-primary focus:ring-opacity-75
+                            transition duration-150 ease-in-out
+                        "
+                    >
+                        Update Credentials
+                    </button>
+                </div>
             </div>
         </div>
     )

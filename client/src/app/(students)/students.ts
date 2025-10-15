@@ -28,7 +28,10 @@ type StudentBase = {
     medium?: string;
 }
 
-type Student = { id: number } & StudentBase
+type Student = { 
+    id: number;
+    user_id?: number;
+} & StudentBase
 
 type Course = {
     id: number;
@@ -53,7 +56,7 @@ type UserBase = {
     full_name: string | null;
     disabled: boolean | null;
     password: string | null;
-    role: string | null;    
+    role: string | null;
 }
 
 type User = { id: number } & UserBase;
@@ -62,6 +65,13 @@ type StudentUpdateResponseParams = {
     updated_student: string;
     response_message: string;
 }
+
+type AddUserRequest = {
+    username: string;
+    password: string;
+    student_id: number;
+    role: string;
+};
 
 const convertResponseToStudentList = (objects: Student[]) => {
 
@@ -151,4 +161,4 @@ const handleTableRowClickEvent = (studentId: number, setSelectedStudent: (studen
 
 export { convertResponseToStudentList, convertResponseToStudent, fetchStudentById, handleTableRowClickEvent }
 
-export type { StudentBase, Student, Course, Performance, StudentUpdateResponseParams }
+export type { StudentBase, Student, Course, Performance, StudentUpdateResponseParams, AddUserRequest }

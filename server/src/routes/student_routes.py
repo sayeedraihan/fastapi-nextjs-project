@@ -5,18 +5,19 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlmodel import Session
 from starlette.responses import JSONResponse
 
-from src.app import get_session, sqlite_file_name
-from src.service.student.student_service import StudentService
+from src.utils.base_utils import Role
+from src.env import sqlite_file_name
+from src.models.student import StudentBase
+from src.db_init import get_session
+from src.service.student_service import student_service
 from src.models.db_models import Student
-from src.models.student import StudentBase, StudentUpdateResponseParams, StudentDeleteParams
-from src.models.user import User
+from src.models.request_response_models import StudentUpdateResponseParams, StudentDeleteParams
+from src.models.db_models import User
 from src.routes.base_routes import get_router
-from src.utils.user_utils import get_current_active_user
-
+from src.utils.user_utils import get_current_active_user, role_checker
 
 router: APIRouter = get_router() # setup our APIRouter
-
-student_service = StudentService()
+admin_dependency = Depends(role_checker([Role.ADMIN]))
 
 @router.put("/add-demo-student")
 def add_demo_student(*, session: Session = Depends(get_session)) -> list[Student]:
@@ -27,7 +28,7 @@ def add_demo_student(*, session: Session = Depends(get_session)) -> list[Student
 
 @router.post("/add-new-student")
 def add_new_student(*, session: Session = Depends(get_session),
-                    student_new: StudentBase, current_user: Annotated[User, Depends(get_current_active_user)]) -> Student:
+                    student_new: StudentBase, current_user: Annotated[User, admin_dependency]) -> Student:
     student = Student(**dict(student_new))
     student.id = 0
     setattr(session, 'student', student)
@@ -35,7 +36,7 @@ def add_new_student(*, session: Session = Depends(get_session),
     return student
 
 @router.get("/get-all-students")
-def get_all_students(*, session: Session = Depends(get_session), current_user: Annotated[User, Depends(get_current_active_user)]):
+def get_all_students(*, session: Session = Depends(get_session), current_user: Annotated[User, admin_dependency]):
     students: list[Student] = student_service.select_all_students(session)
     if not students:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "No students found")
@@ -44,7 +45,7 @@ def get_all_students(*, session: Session = Depends(get_session), current_user: A
 @router.get("/get-student-by-id/{student_id}")
 def get_student_by_id(*, session: Session = Depends(get_session),
                       student_id: str,
-                      current_user: Annotated[User, Depends(get_current_active_user)]):
+                      current_user: Annotated[User, admin_dependency]):
     query_id = int(student_id)
     setattr(session, 'id', query_id)
     students = student_service.select_student_by_id(session)
@@ -56,7 +57,7 @@ def get_student_by_id(*, session: Session = Depends(get_session),
 def update_students_by_id(*, session: Session = Depends(get_session),
                           updated_student: Optional[Student] = None,
                           request: Request,
-                          current_user: Annotated[User, Depends(get_current_active_user)]) -> JSONResponse:
+                          current_user: Annotated[User, admin_dependency]) -> JSONResponse:
     request.session["updated_student"] = dict(updated_student)
     request.session["id"] = updated_student.id
     update_response: StudentUpdateResponseParams = student_service.update_student_by_id(session, request)
@@ -67,10 +68,11 @@ def update_students_by_id(*, session: Session = Depends(get_session),
 @router.delete("/delete-student-by-id")
 def delete_students_by_id(*, session: Session = Depends(get_session),
                           delete_params: Optional[StudentDeleteParams] = None,
-                          current_user: Annotated[User, Depends(get_current_active_user)]):
+                          current_user: Annotated[User, admin_dependency]):
     setattr(session, "property", "id")
     setattr(session, "value", delete_params.id)
     students: list[Student] = student_service.delete_student_by_id(session)
     if not students:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "No student deleted")
     return students
+
