@@ -2,7 +2,6 @@
 
 import { Student } from "@/app/(students)/students";
 import { useAuth } from "@/app/contexts/auth-context";
-import { useStudent } from "@/app/contexts/student-context";
 import { useUtilsObject, UtilsObject } from "@/app/contexts/utils_context";
 import { catchError } from "@/app/routes/route_utils";
 import { useRouter } from "next/navigation";

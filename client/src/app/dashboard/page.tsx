@@ -9,7 +9,7 @@ import { catchError } from "../routes/route_utils";
 const Dashboard = () => {
     const [dashboardData, setDashboardData] = useState<AdminDashboardResponse | StudentDashboardResponse | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [error] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
