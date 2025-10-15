@@ -25,7 +25,8 @@ def add_admin_user(*, session: Session = Depends(get_session), request: Request)
         username="admin",
         email="admin@example.com",
         full_name="System Administrator",
-        password="$2a$12$SW5CVGYA8fjUJKPKqEQtHOZLsDXDgAGI1Prb/EoAVKyNt4pxL8trW"
+        password="$2a$12$SW5CVGYA8fjUJKPKqEQtHOZLsDXDgAGI1Prb/EoAVKyNt4pxL8trW",
+        role="A"
     )
     request.session["user_new"] = dict(user)
     request.session["username"] = user.username
