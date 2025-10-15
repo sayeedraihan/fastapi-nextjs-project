@@ -3,9 +3,9 @@ from typing import Annotated
 
 from fastapi.security import OAuth2PasswordRequestForm
 
-import jwt # type: ignore
+import jwt
 from fastapi import Depends, HTTPException
-from jwt import InvalidTokenError # type: ignore
+from jwt import InvalidTokenError
 from sqlmodel import Session
 from starlette import status
 from starlette.requests import Request

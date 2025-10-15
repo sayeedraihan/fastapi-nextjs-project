@@ -39,6 +39,7 @@ class UserService:
     def add_user(self, session: Session, user: User, student_id: Optional[int]) -> User:
         user.password = get_password_hash(user.password)
         session.add(user)
+        user.id = None
         session.commit()
         session.refresh(user)
         return user
