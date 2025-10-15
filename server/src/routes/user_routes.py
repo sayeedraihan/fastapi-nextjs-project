@@ -46,7 +46,7 @@ def add_new_user(*, session: Session = Depends(get_session),
         role = request.role
     )
     user.id = -1
-    new_user = user_service.add_user(session, user)
+    new_user = user_service.add_user(session, user, request.student_id)
     if not new_user:
 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

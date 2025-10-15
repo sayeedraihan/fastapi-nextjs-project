@@ -1,5 +1,5 @@
 from fastapi.security import OAuth2PasswordBearer
-from passlib.context import CryptContext # type: ignore
+from passlib.context import CryptContext
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="get-token") # the 'get-token' url will use authentication
 
