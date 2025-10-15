@@ -4,20 +4,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 from starlette import status
 
-from src.service.course.course_service import CourseService
-from src.app import get_session
-from src.service.performance.performance_service import PerformanceService
-from src.models.db_models import Performance
-from src.models.performance import GetCoursesAndPerformanceResponse, GetCoursesAndPerformanceRequest, \
+from src.service.course_service import course_service
+from src.db_init import get_session
+from src.service.performance_service import performance_service
+from src.models.db_models import Performance, User
+from src.models.request_response_models import GetCoursesAndPerformanceResponse, GetCoursesAndPerformanceRequest, \
     DeletePerformanceRequest
-from src.models.user import User
 
 from src.utils.user_utils import get_current_active_user
 
 router = APIRouter()
-
-course_service = CourseService()
-performance_service = PerformanceService()
 
 @router.post("/get-courses-and-student-performance", response_model=GetCoursesAndPerformanceResponse)
 def get_courses_and_performance(*, session: Session = Depends(get_session),

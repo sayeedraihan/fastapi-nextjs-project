@@ -1,6 +1,8 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from pydantic import BaseModel
+
+from src.models.db_models import Student
 
 
 class Token(BaseModel):
@@ -15,3 +17,5 @@ class LoginResponse(BaseModel):
     levels: list[Dict[str, str]]
     mediums: list[Dict[str, str]]
     fields: list[Dict[str, str]]
+    role: str | None = None
+

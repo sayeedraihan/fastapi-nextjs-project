@@ -1,9 +1,10 @@
 from fastapi import HTTPException, status
+from sqlalchemy import func
 from sqlmodel import Session, select
 from starlette.requests import Request
 
 from src.models.db_models import Student
-from src.models.student import StudentUpdateResponseParams
+from src.models.request_response_models import StudentUpdateResponseParams
 from src.utils.student_utils import check_existing_student, populate_empty_fields
 
 
@@ -17,7 +18,8 @@ class StudentService:
         session.commit()
         return students
 
-    def add_demo_students(self, session: Session) -> list[Student]:
+    @staticmethod
+    def add_demo_students(session: Session) -> list[Student]:
         student_01 = Student(name='Sayeed', roll=12, level='Ten', section='A1')
         student_02 = Student(name='Raihan', roll=15, level='Nine', section='A2')
         student_03 = Student(name='Sayem', roll=8, level='Six', section='B2')
@@ -33,7 +35,8 @@ class StudentService:
         session.refresh(student_03)
         return [student_01, student_02, student_03]
 
-    def add_student(self, session: Session):
+    @staticmethod
+    def add_student(session: Session):
         student = getattr(session, 'student')
         session.add(student)
         student.id = None
@@ -41,22 +44,26 @@ class StudentService:
         session.refresh(student)
         return student
 
-    def select_all_students(self, session: Session):
+    @staticmethod
+    def select_all_students(session: Session):
         statement = select(Student)
         results = session.exec(statement)
         return [x for x in results]
 
-    def select_student_by_id(self, session: Session):
+    @staticmethod
+    def select_student_by_id(session: Session):
         statement = select(Student).where(Student.id == getattr(session, 'id', -1))
         students = session.exec(statement).all()
         return students
 
-    def select_student_by_id_v2(self, session: Session, id: int):
+    @staticmethod
+    def select_student_by_id_v2(session: Session, id: int):
         statement = select(Student).where(Student.id == id)
         students = session.exec(statement).all()
         return students
 
-    def select_students_by_filter(self, session: Session):
+    @staticmethod
+    def select_students_by_filter(session: Session):
         prop: str = getattr(session, 'property', None)
         value: str | int = getattr(session, 'value', None)
         if property == "roll":
@@ -67,6 +74,12 @@ class StudentService:
             statement = select(Student).where(getattr(Student, prop) == value)
         results = session.exec(statement).all()
         return results
+
+    @staticmethod
+    def get_student_details_by_user_id(session: Session, user_id: int):
+        statement = select(Student).where(Student.user_id == user_id)
+        result = session.exec(statement).first()
+        return result
 
     @populate_empty_fields
     def update_student_by_id(self, session: Session, request: Request) -> StudentUpdateResponseParams:
@@ -116,3 +129,29 @@ class StudentService:
         results = session.exec(statement)
         existing_students: list[Student] = [x for x in results.all()]
         return existing_students[0] if len(existing_students) and existing_students[0].id != updated_student["id"] else None
+    
+    @staticmethod
+    def select_students_by_class(session: Session) -> dict[str, int]: # gemini
+        statement = select(Student.level, func.count(Student.id)).group_by(Student.level) # gemini
+        results = session.exec(statement).all() # gemini
+        return {level: count for level, count in results} # gemini
+    
+    @staticmethod
+    def select_students_by_class_v2(session: Session) -> {str, int}:
+        query = session.exec(Student.level, func.count(Student.id))
+        statement = query.group_by(Student.level)
+        results = statement.all()
+        return results
+
+    @staticmethod
+    def update_student_user_id(session: Session, student_id: int, user_id: int) -> Student:
+        statement = select(Student).where(Student.id == student_id)
+        student = session.exec(statement).first()
+        if student:
+            student.user_id = user_id
+            session.add(student)
+            session.commit()
+            session.refresh(student)
+        return student
+
+student_service = StudentService()

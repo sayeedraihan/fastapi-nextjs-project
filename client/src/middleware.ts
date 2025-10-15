@@ -23,7 +23,7 @@ const middleware = (request: NextRequest) => {
 
     if (sessionToken && pathname === '/login') {
         console.log("sessionToken pathname: " + request.url);
-        return NextResponse.redirect(new URL('/student-list', request.url));
+        return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
     console.log("always pathname: " + pathname);

@@ -1,6 +1,10 @@
 "use client"
 
+import { Student } from "@/app/(students)/students";
+import { useAuth } from "@/app/contexts/auth-context";
+import { useStudent } from "@/app/contexts/student-context";
 import { useUtilsObject, UtilsObject } from "@/app/contexts/utils_context";
+import { catchError } from "@/app/routes/route_utils";
 import { useRouter } from "next/navigation";
 // Needed to install react-hook-form
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
@@ -10,12 +14,17 @@ export type Token = {
     token_type: string;
 }
 
-export type LoginResponse = { token: Token } & UtilsObject
+export type LoginResponse = { 
+    token: Token;
+    student?: Student;
+    role: string;
+} & UtilsObject
 
 const Login = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const router = useRouter();
     const { setUtilsObject } = useUtilsObject();
+    const { setRole } = useAuth();
 
     const onSubmit: SubmitHandler<FieldValues> = async (data: FieldValues) => {
         try {
@@ -30,19 +39,18 @@ const Login = () => {
                 const loginResponse: LoginResponse = JSON.parse(responseText);
                 const utilsObject: UtilsObject = { levels: loginResponse.levels, mediums: loginResponse.mediums, fields: loginResponse.fields };
                 setUtilsObject(utilsObject);
+                setRole(loginResponse.role);
             } else {
-                // Handle login errors (e.g., show an error message)
-                throw new Error("login failed");
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "login failed");
             }
-            //Redirect to a protected page on success
             router.refresh();
-            // router.push("/student-list");
         } catch (error: unknown) {
-            if(error instanceof Error) {
-                throw new Error("An error occured during login. Reason: " + error.message);
-            } else {
-                throw new Error("An error occured during login. Reason unknown.");
-            }
+            catchError(
+                error, 
+                "An error occured during login. Reason: ", 
+                "An error occured during login. Reason unknown."
+            );
         }
     };
     return (

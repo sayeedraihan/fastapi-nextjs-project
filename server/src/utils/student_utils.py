@@ -3,7 +3,7 @@ from typing import Callable
 import json
 
 from src.models.db_models import Student
-from src.models.student import StudentUpdateResponseParams
+from src.models.request_response_models import StudentUpdateResponseParams
 
 
 def populate_empty_fields(func: Callable) -> Callable:

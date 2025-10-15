@@ -10,12 +10,3 @@ class UserBase(SQLModel):
     disabled: bool | None = False
     password: str = None
     role: str = None
-
-class User(UserBase, table=True):
-    id: int = Field(None, primary_key=True)
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-
-    def __str__(self):
-        return json.dumps(dict(self))

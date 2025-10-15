@@ -42,3 +42,7 @@ class Field(Enum):
     Class   = 'level'
     Section = 'section'
     Medium  = 'medium'
+
+class Role(Enum):
+    ADMIN   = "A"
+    STUDENT = "S"

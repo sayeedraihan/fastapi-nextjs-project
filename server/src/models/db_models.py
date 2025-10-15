@@ -1,9 +1,10 @@
 import json
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from sqlalchemy.orm import Mapped
 from sqlmodel import Field, Relationship, SQLModel
 
+from src.models.user import UserBase
 from src.models.course import CourseBase
 from src.models.student import StudentBase
 
@@ -17,6 +18,8 @@ class Performance(SQLModel, table=True):
 
 class Student(StudentBase, table=True):
     id: int = Field(None, primary_key=True)
+    user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    user: Optional["User"] = Relationship(back_populates="student")
     courses: Mapped[List["Course"]] = Relationship(
         back_populates="students",
         link_model=Performance
@@ -32,3 +35,13 @@ class Course(CourseBase, table=True):
         back_populates="courses",
         link_model=Performance
     )
+
+class User(UserBase, table=True):
+    id: int = Field(None, primary_key=True)
+    student: Optional["Student"] = Relationship(back_populates="user")
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+
+    def __str__(self):
+        return json.dumps(dict(self))

@@ -34,13 +34,9 @@ To get a local copy up and running, follow these simple steps.
     ```sh
     pip install -r src/requirements.txt
     ```
-5.  Navigate to the `src` directory:
+5.  Run the FastAPI server:
     ```sh
-    cd src
-    ```
-6.  Run the FastAPI server:
-    ```sh
-    uvicorn app:app --reload
+    uvicorn src.app:app --reload
     ```
 
 The server will be running at `http://127.0.0.1:8000`.
