@@ -26,9 +26,11 @@ __pycache__/
 
 # IDE and OS Files
 /client/.idea/
-.vscode/
+# .vscode/
+.cursor/
 .DS_Store
 Thumbs.db
+
 
 # Logs and Debug Files
 *.log
