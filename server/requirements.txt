@@ -1,0 +1,21 @@
+# FastAPI and Web Server
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+
+# Database and ORM
+sqlmodel==0.0.20
+sqlalchemy==2.0.35
+
+# Authentication and Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+python-multipart==0.0.9
+PyJWT==2.8.0
+itsdangerous==2.1.2
+
+# Templating
+jinja2==3.1.4
+
+# Environment and Configuration
+python-dotenv==1.0.0
