@@ -1,12 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { Course, Performance } from "../../../students";
+import {Performance } from "../../../students";
 import { useStudent } from "../../../../contexts/student-context";
-
 import { useModal } from "../../../../hooks/modal/useModal";
 import Modal from "../../../../custom-components/modal/modal";
 import { catchError } from "@/app/routes/route_utils";
+import { Course } from "@/app/(course)/course";
 
 // This component displays and manages the performance records for a selected student.
 const PerformancePage = () => {

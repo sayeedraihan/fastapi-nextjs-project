@@ -2,7 +2,7 @@
 
 import { Student, useStudent } from "@/app/contexts/student-context";
 import React, { JSX, useEffect, useRef, useState } from "react"
-import { AddUserRequest, fetchStudentById, StudentUpdateResponseParams } from "../../students";
+import { AddUserRequest, fetchStudentById, StudentUpdateResponseParams, User } from "../../students";
 
 import { useUtilsObject } from "@/app/contexts/utils_context";
 
@@ -28,11 +28,13 @@ const StudentDetails = ({
     const [ student, setStudent ] = useState<Student>({ id: -1 });
     const [ updatedStudent, setUpdatedStudent ] = useState<Student>( { id: -1 } );
     const [ isUpdateButtonDisabled, setUpdateButtonDisabled ] = useState<boolean>(true);
-    const [ warningMessage, setWarningMessage ] = useState("");
     const { originalStudentList, selectedStudent, setSelectedStudent } = useStudent();
     const { utilsObject } = useUtilsObject();
     const [isCredentialsModalOpen, setCredentialsModalOpen] = useState(false);
-    const { isOpen, showModal, hideModal } = useModal();
+    const { isOpen, showModal, hideModal, message } = useModal();
+    const [username, setUsername] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+
     const studentNameInputRef = useRef<HTMLInputElement>(null);
     const studentRollInputRef = useRef<HTMLInputElement>(null);
     const studentLevelSelectRef = useRef<HTMLSelectElement>(null);
@@ -47,36 +49,38 @@ const StudentDetails = ({
     const levels = utilsObject.levels;
     const mediums = utilsObject.mediums;
 
-    const checkForDuplicateRoll = (): boolean => {
+    const checkForDuplicateRoll = (): string | null => {
         const newRoll = studentRollInputRef.current? parseInt(studentRollInputRef.current.value) : 0;
         if(newRoll <= 0) {
-            setWarningMessage("The Roll Number is invalid. Please re-insert the value");
-            return true;
+            return "The Roll Number is invalid. Please re-insert the value";
         }
         for(let i = 0; i < originalStudentList.length; i++) {
             if(originalStudentList[i].roll == newRoll && student.id !== originalStudentList[i].id) {
-                setWarningMessage("The Roll Number already exists in the Database. Please change the Roll.");
-                return true;
+                return "The Roll Number already exists in the Database. Please change the Roll.";
             }
         }
-        return false;
+        return null;
     }
 
-    const checkForInvalidName = (): boolean => {
+    const checkForInvalidName = (): string | null => {
         const newName = studentNameInputRef.current ? studentNameInputRef.current.value : "";
         if(/\d/.test(newName)) {
-            setWarningMessage("The Name is invalid. Please change the name.");
-            return true;
+            return "The Name is invalid. Please change the name.";
         }
-        return false;
+        return null;
     }
 
     const checkForInformationValidity = () => {
-        if(checkForDuplicateRoll() || checkForInvalidName()) {
-            showModal(warningMessage);
+        const rollError = checkForDuplicateRoll();
+        if (rollError) {
+            showModal(rollError);
             return false;
         }
-        setWarningMessage("");
+        const nameError = checkForInvalidName();
+        if (nameError) {
+            showModal(nameError);
+            return false;
+        }
         return true;
     }
 
@@ -114,7 +118,6 @@ const StudentDetails = ({
                     setSelectedStudent(JSON.parse(data.updated_student));
                     setStudent(JSON.parse(data.updated_student));
                     setUpdatedStudent(JSON.parse(data.updated_student));
-                    setWarningMessage(data.response_message);
                     showModal(data.response_message);
                 }
             } catch(err: unknown) {
@@ -126,7 +129,37 @@ const StudentDetails = ({
             }
         }
         updateSelectedStudent();
-    }, [updatedStudent, setSelectedStudent, selectedStudent, showModal, warningMessage]);
+    }, [updatedStudent, setSelectedStudent, selectedStudent, showModal]);
+
+    const handleOpenCredentialsModal = async () => {
+        if (student.user_id) {
+            try {
+                const response = await fetch(`/routes/get-user-by-id`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: student.user_id })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || "Failed to fetch username");
+                }
+                const userData: User = await response.json();
+                setUsername(userData.username);
+            } catch (error) {
+                if (error instanceof Error) {
+                    showModal(error.message);
+                } else {
+                    showModal("An unknown error occurred while fetching user data.");
+                }
+                return;
+            }
+        } else {
+            setUsername('');
+        }
+        if (passwordInputRef.current) passwordInputRef.current.value = ''; // Clear password field
+        setShowPassword(false);
+        setCredentialsModalOpen(true);
+    };
 
     const handleViewPerformanceClick = async () => {
         try {
@@ -180,8 +213,7 @@ const StudentDetails = ({
     }
 
     const handleUpdateCredentials = async () => {
-        const username = usernameInputRef.current? usernameInputRef.current.value : null;
-        const password = passwordInputRef.current? passwordInputRef.current.value : null;
+        const password = passwordInputRef.current?.value || null;
 
         if (!username || !password) {
             showModal("Username and password are required.");
@@ -190,10 +222,11 @@ const StudentDetails = ({
 
         try {
             const addUserRequest: AddUserRequest = {
-                username,
+                username: username,
                 password,
                 student_id: student.id,
-                role: "S"
+                role: "S",
+                full_name: student.name,
             };
             const response = await fetch('/routes/update-student-user', {
                 method: 'POST',
@@ -205,9 +238,12 @@ const StudentDetails = ({
                 const errorData = await response.json();
                 throw new Error(errorData.detail || "Failed to update credentials");
             }
-
-            showModal("Credentials updated successfully!");
+            
+            // Refetch student data to get the new user_id
+            fetchStudentById(studentId, setSelectedStudent, setStudent, setError, setLoading, setUpdatedStudent);
+            
             setCredentialsModalOpen(false);
+            showModal("Credentials updated successfully!");
         } catch (error: unknown) {
             if (error instanceof Error) {
                 showModal(error.message);
@@ -237,63 +273,53 @@ const StudentDetails = ({
 
     return (
         <div>
-            <Modal isOpen={isOpen} onClose={hideModal} message={warningMessage} />
+            <Modal isOpen={isOpen} onClose={hideModal} message={message} />
             {/* Credentials modal */}
             {isCredentialsModalOpen && (
                 <div className="fixed inset-0 bg-shadowcolor flex justify-center items-center z-50">
                     <div className="bg-surface text-textprimary p-6 rounded-lg shadow-lg w-full max-w-sm">
-                        <h3 className="text-lg font-bold mb-4">Update Credentials</h3>
+                        <h3 className="text-lg font-bold mb-4">{student.user_id ? 'Update Credentials' : 'Add Credentials'}</h3>
                         <div className="space-y-4">
                             <div className="flex items-center">
                                 <label htmlFor="username" className="w-24 text-right pr-4">Username:</label>
                                 <input
                                     id="username"
                                     type="text"
-                                    ref={usernameInputRef}
-                                    className="
-                                        flex-grow
-                                        p-1
-                                        border-subtle border-2 rounded-md
-                                        focus:outline-none focus:ring-1 focus:ring-primary
-                                        bg-surface
-                                    "
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    disabled={!!student.user_id}
+                                    className="flex-grow p-1 border-subtle border-2 rounded-md focus:outline-none focus:ring-1 focus:ring-primary bg-surface disabled:bg-disabled disabled:cursor-not-allowed"
                                 />
                             </div>
                             <div className="flex items-center">
                                 <label htmlFor="password" className="w-24 text-right pr-4">Password:</label>
-                                <input
-                                    id="password"
-                                    type="password"
-                                    ref={passwordInputRef}
-                                    className="
-                                        flex-grow
-                                        p-1
-                                        border-subtle border-2 rounded-md
-                                        focus:outline-none focus:ring-1 focus:ring-primary
-                                        bg-surface
-                                    "
-                                />
+                                <div className="relative flex-grow">
+                                    <input
+                                        id="password"
+                                        type={showPassword ? "text" : "password"}
+                                        ref={passwordInputRef}
+                                        className="w-full p-1 border-subtle border-2 rounded-md focus:outline-none focus:ring-1 focus:ring-primary bg-surface"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 right-0 px-3 flex items-center text-sm text-textsecondary hover:text-textprimary"
+                                    >
+                                        {showPassword ? 'Hide' : 'Show'}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div className="flex justify-end gap-4 mt-6">
                              <button
                                 onClick={() => setCredentialsModalOpen(false)}
-                                className="
-                                    py-2 px-4
-                                    bg-transparent hover:bg-destructive rounded-lg
-                                    border border-subtle hover:border-transparent
-                                    text-textprimary font-bold hover:text-textprimary
-                                "
+                                className="py-2 px-4 bg-destructive hover:bg-destructive/90 rounded-lg shadow-md text-textprimary font-bold focus:outline-none focus:ring-1 focus:ring-destructive focus:ring-opacity-75 transition duration-150 ease-in-out"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleUpdateCredentials}
-                                className="
-                                    py-2 px-4
-                                    bg-primary hover:bg-primary/90 rounded-lg shadow-md
-                                    text-textprimary font-bold
-                                "
+                                className="py-2 px-4 bg-primary hover:bg-primary/90 rounded-lg shadow-md text-textprimary font-bold focus:outline-none focus:ring-1 focus:ring-primary focus:ring-opacity-75 transition duration-150 ease-in-out"
                             >
                                 OK
                             </button>
@@ -301,12 +327,6 @@ const StudentDetails = ({
                     </div>
                 </div>
             )}
-            {/* Link to performance page */}
-            <div className="flex justify-center my-4">
-                <button onClick={handleViewPerformanceClick} className="text-primary hover:underline">
-                    View Performance
-                </button>
-            </div>
             <div>
                 <span className="text-3xl font-bold flex justify-center">Student ID: {student.id}</span>
             </div>
@@ -441,7 +461,7 @@ const StudentDetails = ({
                         Update Student Data
                     </button>
                     <button
-                        onClick={() => setCredentialsModalOpen(true)}
+                        onClick={handleOpenCredentialsModal}
                         className="
                             py-2 px-2
                             bg-primary hover:bg-primary/90 rounded-lg shadow-md
@@ -450,9 +470,24 @@ const StudentDetails = ({
                             transition duration-150 ease-in-out
                         "
                     >
-                        Update Credentials
+                        {student.user_id ? 'Update Credentials' : 'Add Credentials'}
                     </button>
                 </div>
+            {/* Link to performance page */}
+            <div className="flex justify-center my-4">
+                <button 
+                    onClick={handleViewPerformanceClick} 
+                    className="
+                        py-2 px-2
+                        bg-primary hover:bg-primary/90 rounded-lg shadow-md
+                        text-textprimary font-bold
+                        focus:outline-none focus:ring-1 focus:ring-primary focus:ring-opacity-75
+                        transition duration-150 ease-in-out
+                        "
+                    >
+                    View Performance
+                </button>
+            </div>
             </div>
         </div>
     )

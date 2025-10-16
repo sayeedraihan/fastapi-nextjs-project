@@ -6,7 +6,7 @@ from starlette import status
 from starlette.requests import Request
 
 from src.service.student_service import student_service
-from src.models.request_response_models import AddUserRequest
+from src.models.request_response_models import AddUserRequest, GetUserByIdRequest
 from src.utils.user_utils import role_checker
 from src.utils.base_utils import Role
 from src.models.db_models import User
@@ -43,7 +43,8 @@ def add_new_user(*, session: Session = Depends(get_session),
     user: User = User(
         username = request.username,
         password = request.password,
-        role = request.role
+        role = request.role,
+        full_name = request.full_name
     )
     user.id = -1
     new_user = user_service.add_user(session, user, request.student_id)
@@ -64,6 +65,15 @@ def get_user_by_username(*, session: Session = Depends(get_session),
     user.username = request.username
     request.session["username"] = user.username
     user = user_service.select_users_by_username(session, request)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return user
+
+@router.post("/get-user-by-id", response_model=User)
+def get_user_by_id(*, session: Session = Depends(get_session),
+                   request: GetUserByIdRequest,
+                   current_user: Annotated[User, admin_dependency]):
+    user = user_service.select_user_by_id(session, request.user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user

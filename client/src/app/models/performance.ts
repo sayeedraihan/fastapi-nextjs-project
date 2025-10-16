@@ -1,5 +1,5 @@
-import { Course } from "./course";
-import { Performance } from "./db_models";
+import { Course } from "../(course)/course";
+import { Performance } from "../(students)/students";
 
 export type GetCoursesAndPerformanceResponse = {
     courses: Course[];

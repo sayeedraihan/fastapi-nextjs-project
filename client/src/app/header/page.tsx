@@ -12,22 +12,27 @@ const Header = () => {
         {
             linkName: "Dashboard",
             linkUrl: "/dashboard",
-            role: "AS"
+            roles: ["A", "S"]
         },
         {
             linkName: "List of Students",
             linkUrl: "/student-list",
-            role: "A"
+            roles: ["A"]
         },
         {
             linkName: "Student Details",
             linkUrl: `/student-details/${selectedStudent.id}`,
-            role: "A"
+            roles: ["A"]
         },
         {
             linkName: "Add New Students",
             linkUrl: "/create-student",
-            role: "A"
+            roles: ["A"]
+        },
+        {
+            linkName: "Courses",
+            linkUrl: "/course-list",
+            roles: ["A"]
         }
     ]
     return (
@@ -43,7 +48,7 @@ const Header = () => {
                 font-bold text-textprimary 
             "
         >
-            {linkRefs.filter(linkRef => role && linkRef.role.includes(role)).map((linkRef) => { // gemini
+            {linkRefs.filter(linkRef => role && linkRef.roles.includes(role)).map((linkRef) => {
                 const isActive = 
                     pathname === linkRef.linkUrl || 
                     (pathname.startsWith(linkRef.linkUrl) && linkRef.linkUrl !== "./");

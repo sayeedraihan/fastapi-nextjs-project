@@ -55,7 +55,7 @@ const StudentList = () => {
         );
     }
 
-    const columnHeaders = ["ID", "Name", "Roll", "Class", "Section", "Medium", "Actions"];
+    const columnHeaders = ["ID", "Name", "Roll", "Class", "Section", "Medium", "Credentials", "Actions"];
     return (
         <div className="mx-2 py-2 flex flex-col">
             <Filter />

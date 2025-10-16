@@ -5,6 +5,7 @@ import { StudentContextProvider } from "./contexts/student-context";
 import Footer from "./footer/page";
 import { UtilsObjectContextProvider } from "./contexts/utils_context";
 import { AuthContextProvider } from "./contexts/auth-context";
+import { CourseContextProvider } from "./contexts/course-context";
 
 export const metadata: Metadata = {
 	title: "Create Next App",
@@ -22,13 +23,15 @@ export default function RootLayout({
 				<AuthContextProvider>
 					<UtilsObjectContextProvider>
 						<StudentContextProvider>
-								<div className="flex flex-col h-full py-5 w-full max-w-7xl">
-									<Header />
-									<div className={`bg-surface flex-grow overflow-y-auto`}>
-										{children}
+							<CourseContextProvider>
+									<div className="flex flex-col h-full py-5 w-full max-w-7xl">
+										<Header />
+										<div className={`bg-surface flex-grow overflow-y-auto`}>
+											{children}
+										</div>
+										<Footer />
 									</div>
-									<Footer />
-								</div>
+								</CourseContextProvider>
 							</StudentContextProvider>
 					</UtilsObjectContextProvider>
 				</AuthContextProvider>
