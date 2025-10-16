@@ -55,4 +55,8 @@ class AddUserRequest(BaseModel):
     password: str
     student_id: int
     role: str
+    full_name: Optional[str] = None
+
+class GetUserByIdRequest(BaseModel):
+    user_id: int
 

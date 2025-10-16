@@ -33,14 +33,6 @@ type Student = {
     user_id?: number;
 } & StudentBase
 
-type Course = {
-    id: number;
-    name: string;
-    course_code: string;
-    description: string;
-    credits: number;
-}
-
 type Performance = {
     student_id: number;
     course_id: number;
@@ -71,6 +63,7 @@ type AddUserRequest = {
     password: string;
     student_id: number;
     role: string;
+    full_name?: string;
 };
 
 const convertResponseToStudentList = (objects: Student[]) => {
@@ -83,7 +76,8 @@ const convertResponseToStudentList = (objects: Student[]) => {
             roll:    obj.roll,
             level:   obj.level,
             section: obj.section,
-            medium:  obj.medium
+            medium:  obj.medium,
+            user_id: obj.user_id
         };
         studentList.push(student)
     })
@@ -99,7 +93,8 @@ const convertResponseToStudent = (objects: Student[]) => {
             roll:    obj.roll,
             level:   obj.level,
             section: obj.section,
-            medium:  obj.medium
+            medium:  obj.medium,
+            user_id: obj.user_id
         };
     });
     return fetchedStudent;
@@ -161,4 +156,4 @@ const handleTableRowClickEvent = (studentId: number, setSelectedStudent: (studen
 
 export { convertResponseToStudentList, convertResponseToStudent, fetchStudentById, handleTableRowClickEvent }
 
-export type { StudentBase, Student, Course, Performance, StudentUpdateResponseParams, AddUserRequest }
+export type { StudentBase, Student, Performance, StudentUpdateResponseParams, AddUserRequest, User, UserBase }

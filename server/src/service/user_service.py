@@ -14,6 +14,12 @@ class UserService:
         statement = select(User).where(User.username == username)
         user = session.exec(statement).first()
         return user
+    
+    @staticmethod
+    def select_user_by_id(session: Session, user_id: int) -> User | None:
+        statement = select(User).where(User.id == user_id)
+        user = session.exec(statement).first()
+        return user
 
     @staticmethod
     def check_existing_user(func):
@@ -49,7 +55,6 @@ class UserService:
         statement = select(User).where(User.id == user.id)
         existing_user = session.exec(statement).first()
         if existing_user:
-            existing_user.username = user.username
             existing_user.password = get_password_hash(user.password)
             session.add(existing_user)
             session.commit()

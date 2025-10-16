@@ -32,25 +32,29 @@ const TableRow = ({columnHeaders, rowData, onDeleteClick, index}: TableRowProps)
     } else if(rowData) {
         const studentId = rowData.id;
         return (
-            <tr className={`text-textprimary hover:bg-surface/10 hover:text-textprimary`}>
+            <tr className={`text-textprimary hover:bg-primary/25 hover:text-textprimary`}>
                 <td
                     onClick={() => {handleTableRowClickEvent(studentId, setSelectedStudent, router)}} 
-                    className={`
-                        border-subtle border-2 
-                        ${"hover:cursor-pointer"}
-                    `}
+                    className="border-subtle border-2 hover:cursor-pointer px-4 py-2"
                 >
                     {index}
                 </td>
-                {Object.values(rowData).map((data, lowerIndex) => (
-                    (lowerIndex > 0) && 
-                    <DataCell 
-                        key={(Object.values(rowData)[0] as string) + lowerIndex} 
-                        cellData={data as string} 
-                        studentId={studentId}
-                        clickable={lowerIndex < 2}
-                    />
-                ))}
+                {Object.entries(rowData).map(([key, value]) => {
+                    if(key == "user_id" || key == "id") {
+                        return null;
+                    }
+                    return (
+                        <DataCell 
+                            key={`${studentId}-${key}`} 
+                            cellData={value as string} 
+                            studentId={studentId}
+                            clickable={key == 'name'}
+                        />
+                    );
+                })}
+                <td className="border-subtle border-2 text-center">
+                    {rowData.user_id ? '✓' : ''}
+                </td>
                 <td className="border-subtle border-2">
                     <button 
                         onClick={() => onDeleteClick && onDeleteClick(rowData.id.toString())} 
