@@ -2,6 +2,13 @@
 
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
+export interface AuditModel {
+    created_at?: string;
+    created_by?: string;
+    updated_at?: string;
+    updated_by?: string;
+}
+
 export const enum LEVEL {
     ONE=    "one",
     TWO=    "two",
@@ -26,7 +33,7 @@ type StudentBase = {
     level?: string;
     section?: string;
     medium?: string;
-}
+}& AuditModel
 
 type Student = { 
     id: number;
@@ -40,7 +47,7 @@ type Performance = {
     semester: number;
     practical: number;
     in_course: number;
-}
+} & AuditModel
 
 type UserBase = {
     username: string;
@@ -49,7 +56,7 @@ type UserBase = {
     disabled: boolean | null;
     password: string | null;
     role: string | null;
-}
+} & AuditModel
 
 type User = { id: number } & UserBase;
 
@@ -71,13 +78,17 @@ const convertResponseToStudentList = (objects: Student[]) => {
     const studentList: Student[] = [];
     objects.forEach((obj: Student) => {
         const student: Student = {
-            id:      obj.id,
-            name:    obj.name,
-            roll:    obj.roll,
-            level:   obj.level,
-            section: obj.section,
-            medium:  obj.medium,
-            user_id: obj.user_id
+            id:         obj.id,
+            name:       obj.name,
+            roll:       obj.roll,
+            level:      obj.level,
+            section:    obj.section,
+            medium:     obj.medium,
+            user_id:    obj.user_id,
+            created_at: obj.created_at,
+            created_by: obj.created_by,
+            updated_at: obj.updated_at,
+            updated_by: obj.updated_by
         };
         studentList.push(student)
     })
@@ -88,13 +99,17 @@ const convertResponseToStudent = (objects: Student[]) => {
     let fetchedStudent: Student = { id: -1 }
     objects.forEach((obj: Student) => {
         fetchedStudent = {
-            id:      obj.id,
-            name:    obj.name,
-            roll:    obj.roll,
-            level:   obj.level,
-            section: obj.section,
-            medium:  obj.medium,
-            user_id: obj.user_id
+            id:         obj.id,
+            name:       obj.name,
+            roll:       obj.roll,
+            level:      obj.level,
+            section:    obj.section,
+            medium:     obj.medium,
+            user_id:    obj.user_id,
+            created_at: obj.created_at,
+            created_by: obj.created_by,
+            updated_at: obj.updated_at,
+            updated_by: obj.updated_by
         };
     });
     return fetchedStudent;

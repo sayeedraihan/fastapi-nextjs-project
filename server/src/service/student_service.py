@@ -2,6 +2,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import func
 from sqlmodel import Session, select
 from starlette.requests import Request
+from datetime import datetime, timezone
 
 from src.models.db_models import Student
 from src.models.request_response_models import StudentUpdateResponseParams
@@ -20,9 +21,10 @@ class StudentService:
 
     @staticmethod
     def add_demo_students(session: Session) -> list[Student]:
-        student_01 = Student(name='Sayeed', roll=12, level='Ten', section='A1')
-        student_02 = Student(name='Raihan', roll=15, level='Nine', section='A2')
-        student_03 = Student(name='Sayem', roll=8, level='Six', section='B2')
+        now = datetime.now(timezone.utc)
+        student_01 = Student(name='Sayeed', roll=12, level='Ten', section='A1', created_at=now, created_by="SYS", updated_at=now, updated_by="SYS")
+        student_02 = Student(name='Raihan', roll=15, level='Nine', section='A2', created_at=now, created_by="SYS", updated_at=now, updated_by="SYS")
+        student_03 = Student(name='Sayem', roll=8, level='Six', section='B2', created_at=now, created_by="SYS", updated_at=now, updated_by="SYS")
 
         session.add(student_01)
         session.add(student_02)
@@ -36,8 +38,11 @@ class StudentService:
         return [student_01, student_02, student_03]
 
     @staticmethod
-    def add_student(session: Session):
-        student = getattr(session, 'student')
+    def add_student(session: Session, student: Student, creator_username: str):
+        student.created_at = datetime.now(timezone.utc)
+        student.created_by = creator_username
+        student.updated_at = datetime.now(timezone.utc)
+        student.updated_by = creator_username
         session.add(student)
         student.id = None
         session.commit()
@@ -51,8 +56,8 @@ class StudentService:
         return [x for x in results]
 
     @staticmethod
-    def select_student_by_id(session: Session):
-        statement = select(Student).where(Student.id == getattr(session, 'id', -1))
+    def select_student_by_id(session: Session, query_id: int):
+        statement = select(Student).where(Student.id == query_id)
         students = session.exec(statement).all()
         return students
 
@@ -66,7 +71,7 @@ class StudentService:
     def select_students_by_filter(session: Session):
         prop: str = getattr(session, 'property', None)
         value: str | int = getattr(session, 'value', None)
-        if property == "roll":
+        if prop == "roll":
             value = int(value)
         if value == '' and prop == '':
             statement = select(Student)
@@ -82,53 +87,53 @@ class StudentService:
         return result
 
     @populate_empty_fields
-    def update_student_by_id(self, session: Session, request: Request) -> StudentUpdateResponseParams:
-        is_duplicate_student: bool = self.get_existing_student(session, request)
+    def update_student_by_id(self, session: Session, student_data: Student, updater_username: str) -> StudentUpdateResponseParams:
+        is_duplicate_student: bool = self.get_existing_student(session, student_data)
         response: StudentUpdateResponseParams = StudentUpdateResponseParams()
         if is_duplicate_student:
             response.response_message = (
                     "Could not update information."
                     + " There already exists a record for student with roll "
-                    + str(request.session["updated_student"]["roll"])
-                    + " in Class " + request.session["updated_student"]["level"]
-                    + " (section " + request.session["updated_student"]["section"] + ")."
+                    + str(student_data.roll)
+                    + " in Class " + student_data.level
+                    + " (section " + student_data.section + ")."
                     + " Please check the information again."
             )
         else:
-            student_id = request.session["id"]
-            updated_student: dict = request.session["updated_student"]
+            student_id = student_data.id
             statement = select(Student).where(Student.id == student_id)
-            result = session.exec(statement).first()
-            student = result
-            for key, value in updated_student.items():
+            student = session.exec(statement).first()
+            updated_student_dict = student_data.model_dump(exclude_unset=True)
+            for key, value in updated_student_dict.items():
                 if key in ['id', 'roll', 'section'] and (
                         value is None or value == "" or ("str" != (str(type(value))[8:11]) and value <= 0)):
                     continue
                 else:
                     setattr(student, key, value)
+            student.updated_at = datetime.now(timezone.utc)
+            student.updated_by = updater_username
             session.add(student)
             session.commit()
             session.refresh(student)
             response.response_message = (
                     "Record for "
-                    + request.session["updated_student"]["name"]
+                    + student_data.name
                     + " Updated Successfully"
             )
             response.updated_student = student.model_dump_json()
         return response
 
     @check_existing_student
-    def get_existing_student(self, session: Session, request: Request) -> Student:
-        updated_student: dict = request.session["updated_student"]
+    def get_existing_student(self, session: Session, student_data: Student) -> Student:
         statement = (
             select(Student)
-            .where(Student.roll == updated_student["roll"])
-            .where(Student.level == updated_student["level"])
-            .where(Student.section == updated_student["section"])
+            .where(Student.roll == student_data.roll)
+            .where(Student.level == student_data.level)
+            .where(Student.section == student_data.section)
         )
         results = session.exec(statement)
         existing_students: list[Student] = [x for x in results.all()]
-        return existing_students[0] if len(existing_students) and existing_students[0].id != updated_student["id"] else None
+        return existing_students[0] if len(existing_students) and existing_students[0].id != student_data.id else None
     
     @staticmethod
     def select_students_by_class(session: Session) -> dict[str, int]: # gemini
@@ -144,11 +149,13 @@ class StudentService:
         return results
 
     @staticmethod
-    def update_student_user_id(session: Session, student_id: int, user_id: int) -> Student:
+    def update_student_user_id(session: Session, student_id: int, user_id: int, updater_username: str) -> Student:
         statement = select(Student).where(Student.id == student_id)
         student = session.exec(statement).first()
         if student:
             student.user_id = user_id
+            student.updated_at = datetime.now(timezone.utc)
+            student.updated_by = updater_username
             session.add(student)
             session.commit()
             session.refresh(student)

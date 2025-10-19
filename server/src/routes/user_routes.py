@@ -28,10 +28,7 @@ def add_admin_user(*, session: Session = Depends(get_session), request: Request)
         password="$2a$12$SW5CVGYA8fjUJKPKqEQtHOZLsDXDgAGI1Prb/EoAVKyNt4pxL8trW",
         role="A"
     )
-    request.session["user_new"] = dict(user)
-    request.session["username"] = user.username
-    request.session["password"] = user.password
-    user = user_service.add_user(session, user)
+    user = user_service.add_user(session, user, "SYS")
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
@@ -46,13 +43,12 @@ def add_new_user(*, session: Session = Depends(get_session),
         role = request.role,
         full_name = request.full_name
     )
-    user.id = -1
-    new_user = user_service.add_user(session, user, request.student_id)
+    new_user = user_service.add_user(session, user, current_user.username)
     if not new_user:
 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     if request.role == "S":
-        student_service.update_student_user_id(session, request.student_id, new_user.id)
+        student_service.update_student_user_id(session, request.student_id, new_user.id, current_user.username)
     return new_user
 
 @router.get("/get-user/{username}")
@@ -60,11 +56,7 @@ def get_user_by_username(*, session: Session = Depends(get_session),
                          add_user_request: AddUserRequest, 
                          request: Request, 
                          current_user: Annotated[User, admin_dependency]):
-    user: User = User()
-    user.id = -1
-    user.username = request.username
-    request.session["username"] = user.username
-    user = user_service.select_users_by_username(session, request)
+    user = user_service.select_users_by_username(session, request.username)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user

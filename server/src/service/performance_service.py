@@ -1,4 +1,5 @@
 from sqlmodel import Session, select
+from datetime import datetime, timezone
 
 from src.models.db_models import Performance
 
@@ -16,7 +17,11 @@ class PerformanceService:
         return True
 
     @staticmethod
-    def add_performance(session: Session, performance: Performance) -> Performance:
+    def add_performance(session: Session, performance: Performance, creator_username: str) -> Performance:
+        performance.created_at = datetime.now(timezone.utc)
+        performance.created_by = creator_username
+        performance.updated_at = datetime.now(timezone.utc)
+        performance.updated_by = creator_username
         session.add(performance)
         session.commit()
         session.refresh(performance)
@@ -29,7 +34,7 @@ class PerformanceService:
         return [x for x in result]
 
     @staticmethod
-    def update_performance(session: Session, performance: Performance) -> Performance:
+    def update_performance(session: Session, performance: Performance, updater_username: str) -> Performance:
         statement = select(Performance).where(Performance.student_id == performance.student_id)
         result = session.exec(statement).one()
 
@@ -37,6 +42,9 @@ class PerformanceService:
         result.semester = performance.semester
         result.practical = performance.practical
         result.in_course = performance.in_course
+
+        result.updated_at = datetime.now(timezone.utc)
+        result.updated_by = updater_username
 
         session.add(result)
         session.commit()

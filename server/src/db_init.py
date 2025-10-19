@@ -6,6 +6,7 @@ from sqlmodel import SQLModel, Session, select
 from src.models.db_models import User
 from src.env import sqlite_url
 from src.utils.authentication_utils import get_password_hash
+from datetime import datetime, timezone
 
 # Define the engine globally. 
 # connect_args is needed for SQLite to work with multiple threads, which FastAPI can use.
@@ -30,7 +31,11 @@ def initialize_database():
                 full_name='System Administrator',
                 disabled=False,
                 password=hashed_password,
-                role="A"
+                role="A",
+                created_at=datetime.now(timezone.utc),
+                created_by="SYS",
+                updated_at=datetime.now(timezone.utc),
+                updated_by="SYS"
             )
             session.add(admin_user)
             session.commit()
