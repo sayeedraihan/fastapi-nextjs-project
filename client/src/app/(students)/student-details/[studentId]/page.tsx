@@ -4,12 +4,11 @@ import { Student, useStudent } from "@/app/contexts/student-context";
 import React, { JSX, useEffect, useRef, useState } from "react"
 import { AddUserRequest, fetchStudentById, StudentUpdateResponseParams, User } from "../../students";
 
-import { useUtilsObject } from "@/app/contexts/utils_context";
-
 import { useModal } from "@/app/hooks/modal/useModal";
 import Modal from "@/app/custom-components/modal/modal";
 import { useRouter } from 'next/navigation';
 import { useAuth } from "@/app/contexts/auth-context";
+import { catchError } from "@/app/routes/route_utils";
 
 export type StudentDetailsParams = {
     studentId: string;
@@ -18,6 +17,8 @@ export type StudentDetailsParams = {
 export type UpdateStudentParams = {
     studentId: string;
 }
+
+type EnumOption = { [key: string]: string };
 
 const StudentDetails = ({ 
     params 
@@ -32,10 +33,11 @@ const StudentDetails = ({
     const { isOpen, showModal, hideModal, message } = useModal();
     const { originalStudentList, selectedStudent, setSelectedStudent } = useStudent();
     const { role } = useAuth();
-    const { utilsObject } = useUtilsObject();
     const [isCredentialsModalOpen, setCredentialsModalOpen] = useState(false);
     const [username, setUsername] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [ levels, setLevels ] = useState<EnumOption[]>([]);
+    const [ mediums, setMediums ] = useState<EnumOption[]>([]);
 
     const studentNameInputRef = useRef<HTMLInputElement>(null);
     const studentRollInputRef = useRef<HTMLInputElement>(null);
@@ -48,8 +50,6 @@ const StudentDetails = ({
 
     const resolvedParams = React.use(params);
     const studentId = resolvedParams.studentId;
-    const levels = utilsObject.levels;
-    const mediums = utilsObject.mediums;
 
     const checkForDuplicateRoll = (): string | null => {
         const newRoll = studentRollInputRef.current? parseInt(studentRollInputRef.current.value) : 0;
@@ -254,6 +254,29 @@ const StudentDetails = ({
         }
         updateSelectedStudent();
     }, [updatedStudent, setSelectedStudent, selectedStudent, showModal]);
+
+    useEffect(() => {
+        const fetchEnums = async () => {
+            try {
+            const response = await fetch("/routes/get-utils", {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch filter data');
+            }
+
+            let allEnums = await response.json();
+            setLevels(allEnums[1]);
+            setMediums(allEnums[2]);
+
+            } catch (error: unknown) {
+                catchError(error, "Error fetching enums: ", "Unknown error fetching enums");
+            }
+        };
+        fetchEnums();
+    }, []);
 
     if (role !== "A") {
         return (

@@ -15,8 +15,5 @@ class TokenData(BaseModel):
 
 class LoginResponse(BaseModel):
     token: Token
-    levels: list[Dict[str, str]]
-    mediums: list[Dict[str, str]]
-    fields: list[Dict[str, str]]
     role: str | None = None
 

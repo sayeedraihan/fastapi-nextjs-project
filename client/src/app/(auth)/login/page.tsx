@@ -2,7 +2,6 @@
 
 import { Student } from "@/app/(students)/students";
 import { useAuth } from "@/app/contexts/auth-context";
-import { useUtilsObject, UtilsObject } from "@/app/contexts/utils_context";
 import { catchError } from "@/app/routes/route_utils";
 import { useRouter } from "next/navigation";
 // Needed to install react-hook-form
@@ -17,12 +16,11 @@ export type LoginResponse = {
     token: Token;
     student?: Student;
     role: string;
-} & UtilsObject
+}
 
 const Login = () => {
     const { register, handleSubmit, formState: { errors } } = useForm({ defaultValues: { username: "", password: "" } });
     const router = useRouter();
-    const { setUtilsObject } = useUtilsObject();
     const { setRole } = useAuth();
 
     const onSubmit: SubmitHandler<FieldValues> = async (data: FieldValues) => {
@@ -36,8 +34,6 @@ const Login = () => {
                 const responseClone = response.clone();
                 const responseText = await responseClone.text();
                 const loginResponse: LoginResponse = JSON.parse(responseText);
-                const utilsObject: UtilsObject = { levels: loginResponse.levels, mediums: loginResponse.mediums, fields: loginResponse.fields };
-                setUtilsObject(utilsObject);
                 setRole(loginResponse.role);
             } else {
                 const errorData = await response.json();

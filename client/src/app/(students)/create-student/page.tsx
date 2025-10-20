@@ -4,17 +4,18 @@ import { useStudent } from "@/app/contexts/student-context";
 import { useEffect, useRef, useState } from "react"
 import { Student, StudentBase } from "../students";
 
-
-import { useUtilsObject } from "@/app/contexts/utils_context";
 import { useModal } from "@/app/hooks/modal/useModal";
 import Modal from "@/app/custom-components/modal/modal";
 import { useAuth } from "@/app/contexts/auth-context";
+import { catchError } from "@/app/routes/route_utils";
 
 const demoStudent: StudentBase = { name: "", roll: 0, level: "", section: "" }
 
 export type CreateStudentParams = {
     new_student: StudentBase;
 }
+
+type EnumOption = { [key: string]: string };
 
 const CreateStudent = () => {
     const [ loading, setLoading ] = useState<boolean>(true);
@@ -23,9 +24,10 @@ const CreateStudent = () => {
     const [ isCreateButtonDisabled, setCreateButtonDisabled ] = useState<boolean>(true);
     const [ newStudent, setNewStudent ] = useState<StudentBase | null>( null );
     const [ warningMessage, setWarningMessage ] = useState("");
+    const [ levels, setLevels ] = useState<EnumOption[]>([]);
+    const [ mediums, setMediums ] = useState<EnumOption[]>([]);
     const { role } = useAuth();
     const { originalStudentList, setSelectedStudent } = useStudent();
-    const { utilsObject } = useUtilsObject();
     const { isOpen, showModal, hideModal } = useModal();
 
     const studentNameInputRef = useRef<HTMLInputElement>(null);
@@ -33,9 +35,6 @@ const CreateStudent = () => {
     const studentLevelSelectRef = useRef<HTMLSelectElement>(null);
     const studentSectionInputRef = useRef<HTMLInputElement>(null);
     const studentMediumSelectRef = useRef<HTMLSelectElement>(null);
-
-    const levels = utilsObject.levels;
-    const mediums = utilsObject.mediums;
 
     const checkForDuplicateRoll = (): boolean => {
         const newRoll = studentRollInputRef.current? parseInt(studentRollInputRef.current.value) : 0;
@@ -82,12 +81,17 @@ const CreateStudent = () => {
         }
     }
 
-    if (role !== "A") {
-        return (
-            <div className="p-4 text-center text-destructive">
-                You do not have permission to access this resource
-            </div>
-        );
+    const onValueChanged = (current: HTMLInputElement | HTMLSelectElement | null, currentValue: string | number | undefined, 
+        propertyType: string) => {
+        
+        if(!isCreateButtonDisabled && current 
+            && ((["name", "level", "section", "medium"].includes(propertyType) && current.value.length === 0) 
+            || ("roll" === propertyType && (parseInt(current.value) <= 0 || Number.isNaN(current.value))))
+        ) {
+            setCreateButtonDisabled(true);
+        } else if(isCreateButtonDisabled) {
+            setCreateButtonDisabled(false);
+        }
     }
 
     useEffect(() => {
@@ -126,17 +130,35 @@ const CreateStudent = () => {
         addNewStudent();
     }, [newStudent, setSelectedStudent, showModal]);
 
-    const onValueChanged = (current: HTMLInputElement | HTMLSelectElement | null, currentValue: string | number | undefined, 
-        propertyType: string) => {
-        
-        if(!isCreateButtonDisabled && current 
-            && ((["name", "level", "section", "medium"].includes(propertyType) && current.value.length === 0) 
-            || ("roll" === propertyType && (parseInt(current.value) <= 0 || Number.isNaN(current.value))))
-        ) {
-            setCreateButtonDisabled(true);
-        } else if(isCreateButtonDisabled) {
-            setCreateButtonDisabled(false);
-        }
+    useEffect(() => {
+        const fetchEnums = async () => {
+            try {
+            const response = await fetch("/routes/get-utils", {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch filter data');
+            }
+
+            let allEnums = await response.json();
+            setLevels(allEnums[1]);
+            setMediums(allEnums[2]);
+
+            } catch (error: unknown) {
+                catchError(error, "Error fetching enums: ", "Unknown error fetching enums");
+            }
+        };
+        fetchEnums();
+    }, []);
+
+    if (role !== "A") {
+        return (
+            <div className="p-4 text-center text-destructive">
+                You do not have permission to access this resource
+            </div>
+        );
     }
 
     if(loading) {

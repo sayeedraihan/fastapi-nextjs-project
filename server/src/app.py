@@ -5,9 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from src.routes import course_routes
-from src.routes import dashboard_routes
-from src.routes import student_routes, db_routes, authentication_routes, user_routes, performance_routes
+from src.routes import authentication_routes, course_routes, dashboard_routes, db_routes, performance_routes, student_routes, user_routes, util_routes
 from src.templating import template_Init
 from src.db_init import initialize_database # gemini
 from contextlib import asynccontextmanager # gemini
@@ -50,6 +48,7 @@ app.include_router(template_Init.router)
 app.include_router(performance_routes.router)
 app.include_router(dashboard_routes.router)
 app.include_router(course_routes.router)
+app.include_router(util_routes.router)
 app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET_KEY)
 
 # === ADD THIS SECTION ===
