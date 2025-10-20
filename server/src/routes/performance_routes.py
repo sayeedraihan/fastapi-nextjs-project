@@ -38,9 +38,11 @@ def update_performance_route(*, session: Session = Depends(get_session),
                          current_user: Annotated[User, Depends(get_current_active_user)]):
     return performance_service.update_performance(session, performance, current_user.username)
 
-@router.delete("/delete-performance")
-def delete_performance_route(*, session: Session = Depends(get_session), request: DeletePerformanceRequest):
-    if performance_service.delete_performance(session, request.student_id, request.course_id):
+@router.put("/delete-performance")
+def delete_performance_route(*, session: Session = Depends(get_session), 
+                             current_user: Annotated[User, Depends(get_current_active_user)], 
+                             request: DeletePerformanceRequest):
+    if performance_service.delete_performance(session, request.student_id, request.course_id, current_user.username):
         return {"message": "Performance record deleted successfully"}
     else:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not delete performance record")

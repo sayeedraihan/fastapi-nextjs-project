@@ -39,7 +39,7 @@ const Table = ({columnHeaders, tableData}: TableProps) => {
                 id: id
             }
             const response = await fetch(`/routes/delete-student-by-id`, {
-                method: "DELETE",
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(deleteParams),
             });

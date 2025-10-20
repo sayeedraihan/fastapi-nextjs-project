@@ -1,18 +1,22 @@
-from sqlmodel import Session, select
+from sqlmodel import Session, select, update
 from datetime import datetime, timezone
 
 from src.models.db_models import Performance
 
 
 class PerformanceService:
-    def delete_performance(self, session: Session, student_id: int, course_id: int) -> bool:
+    def delete_performance(self, session: Session, student_id: int, course_id: int, deleted_by: str) -> bool:
         statement = (
-            select(Performance)
+            update(Performance)
             .where(Performance.student_id == student_id)
             .where(Performance.course_id == course_id)
+            .values(
+                deleted_by=deleted_by,
+                deleted_at=datetime.now(timezone.utc),
+                status="I"
+            )
         )
-        result = session.exec(statement).one()
-        session.delete(result)
+        session.exec(statement)
         session.commit()
         return True
 
@@ -35,7 +39,7 @@ class PerformanceService:
 
     @staticmethod
     def update_performance(session: Session, performance: Performance, updater_username: str) -> Performance:
-        statement = select(Performance).where(Performance.student_id == performance.student_id)
+        statement = select(Performance).where(Performance.student_id == performance.student_id, Performance.course_id == performance.course_id)
         result = session.exec(statement).one()
 
         result.attendance = performance.attendance

@@ -37,7 +37,9 @@ const TableRow = ({columnHeaders, rowData, onDeleteClick, index}: TableRowProps)
         const excludeKeys = new Set([
             "id", "user_id", 
             "created_at", "created_by", 
-            "updated_at", "updated_by"
+            "updated_at", "updated_by",
+            "deleted_at", "deleted_by",
+            "status"
         ]);
         return (
             <tr className={`text-textprimary hover:bg-primary/25 hover:text-textprimary`}>

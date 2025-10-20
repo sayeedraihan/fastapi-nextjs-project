@@ -141,7 +141,7 @@ const PerformancePage = () => {
         const performance = performances[index];
         try {
             const response = await fetch('/routes/delete-performance', {
-                method: 'DELETE',
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ student_id: performance.student_id, course_id: performance.course_id }),
             });

@@ -11,7 +11,7 @@ from src.models.student import StudentBase
 from src.db_init import get_session
 from src.service.student_service import student_service
 from src.models.db_models import Student
-from src.models.request_response_models import StudentUpdateResponseParams, StudentDeleteParams
+from src.models.request_response_models import BaseRequestResponse, StudentUpdateResponseParams, StudentDeleteParams
 from src.models.db_models import User
 from src.routes.base_routes import get_router
 from src.utils.user_utils import get_current_active_user, role_checker
@@ -49,7 +49,7 @@ def get_student_by_id(*, session: Session = Depends(get_session),
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Student found with this ID")
     return students
 
-@router.post("/update-student-by-id")
+@router.put("/update-student-by-id")
 def update_students_by_id(*, session: Session = Depends(get_session),
                           updated_student: Optional[Student] = None,
                           request: Request,
@@ -59,14 +59,12 @@ def update_students_by_id(*, session: Session = Depends(get_session),
     response: JSONResponse = JSONResponse(content=update_response.model_dump())
     return response
 
-@router.delete("/delete-student-by-id")
+@router.put("/delete-student-by-id")
 def delete_students_by_id(*, session: Session = Depends(get_session),
                           delete_params: Optional[StudentDeleteParams] = None,
                           current_user: Annotated[User, admin_dependency]):
-    setattr(session, "property", "id")
-    setattr(session, "value", delete_params.id)
-    students: list[Student] = student_service.delete_student_by_id(session)
-    if not students:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "No student deleted")
-    return students
+    response: BaseRequestResponse = student_service.delete_student_by_id(session, "id", delete_params.id, current_user.username)
+    if not response:
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = f"No student found with id = {delete_params.id}")
+    return response
 

@@ -1,23 +1,30 @@
 from fastapi import HTTPException, status
 from sqlalchemy import func
-from sqlmodel import Session, select
+from sqlmodel import Session, select, update
 from starlette.requests import Request
 from datetime import datetime, timezone
 
 from src.models.db_models import Student
-from src.models.request_response_models import StudentUpdateResponseParams
+from src.models.request_response_models import BaseRequestResponse, StudentUpdateResponseParams
 from src.utils.student_utils import check_existing_student, populate_empty_fields
 
 
 class StudentService:
-    def delete_student_by_id(self, session: Session):
-        students: list[Student] = self.select_students_by_filter(session)
-        if not students:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Student found with the ID")
-        for student in students:
-            session.delete(student)
+    def delete_student_by_id(self, session: Session, prop: str, value: str | int, deleted_by: str):
+        update_student_statement = (
+            update(Student)
+            .where(getattr(Student, prop) == value)
+            .values(
+                deleted_at = datetime.now(timezone.utc),
+                deleted_by = deleted_by,
+                status = "I"
+            )
+        )
+        result = session.exec(update_student_statement)
+        if result.rowcount == 0:
+            return None
         session.commit()
-        return students
+        return BaseRequestResponse(message=f"Successfully deleted student(s) where {prop} = {value}")
 
     @staticmethod
     def add_demo_students(session: Session) -> list[Student]:
@@ -68,9 +75,7 @@ class StudentService:
         return students
 
     @staticmethod
-    def select_students_by_filter(session: Session):
-        prop: str = getattr(session, 'property', None)
-        value: str | int = getattr(session, 'value', None)
+    def select_students_by_filter(session: Session, prop: str, value: str | int):
         if prop == "roll":
             value = int(value)
         if value == '' and prop == '':

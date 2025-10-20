@@ -20,7 +20,10 @@ const CourseList = () => {
     const fetchCourses = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/routes/get-all-courses');
+            const response = await fetch('/routes/get-all-courses', {
+            method: "GET",
+            headers: { "Content-Type" : "application/json" },
+        });
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.detail || "Failed to fetch courses");
@@ -52,7 +55,7 @@ const CourseList = () => {
         if (!courseToDelete) return;
         try {
             const response = await fetch('/routes/delete-course', {
-                method: 'POST',
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ courseId: courseToDelete.id }),
             });

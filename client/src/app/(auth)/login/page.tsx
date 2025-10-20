@@ -20,7 +20,7 @@ export type LoginResponse = {
 } & UtilsObject
 
 const Login = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { register, handleSubmit, formState: { errors } } = useForm({ defaultValues: { username: "", password: "" } });
     const router = useRouter();
     const { setUtilsObject } = useUtilsObject();
     const { setRole } = useAuth();
@@ -56,7 +56,7 @@ const Login = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
             <div>
                 <br />
-                <label htmlFor="username" className="pr-2 mt-1 ml-4">Username: </label>
+                <label htmlFor="username" className="pr-2 mt-1 ml-4 text-textsecondary">Username: </label>
                 <input
                     id="username" 
                     className="
@@ -66,18 +66,20 @@ const Login = () => {
                         border-bordercolor border-2 rounded-md 
                         focus:outline-none focus:ring-1 focus:ring-fontcolor 
                         bg-secondary 
+                        text-textsecondary
+                        placeholder-textprimary
                     "
+                    placeholder="Enter your username"
                     {...register('username', { required: 'Username is required' })} 
                 />
                 {errors.username && <p>{errors.username.message as string}</p>}
             </div>
             <br />
             <div>
-                <label htmlFor="password" className="pr-2 mt-1 ml-5">Password: </label>
+                <label htmlFor="password" className="pr-2 mt-1 ml-5 text-textsecondary">Password: </label>
                 <input
                     id="password"
                     type="password"
-                    {...register('password', { required: 'Password is required' })} 
                     className="
                         ml-1 
                         p-1 
@@ -85,7 +87,11 @@ const Login = () => {
                         border-bordercolor border-2 rounded-md 
                         focus:outline-none focus:ring-1 focus:ring-fontcolor 
                         bg-secondary 
+                        text-textsecondary
+                        placeholder-textprimary
                     "
+                    placeholder="Enter your password"
+                    {...register('password', { required: 'Password is required' })}
                 />
                 {errors.password && <p>{errors.password.message as string}</p>}
             </div>

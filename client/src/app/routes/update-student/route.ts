@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { catchError } from "../route_utils";
 
-const POST = async(
+const PUT = async(
     request: NextRequest,
 ) => {
     try {
@@ -11,7 +11,7 @@ const POST = async(
         const sessionTokenCookie = (await cookies()).get("session_token");
         const token = sessionTokenCookie?.value;
         const apiResponse = await fetch(`http://localhost:8000/update-student-by-id`, {
-            method: "POST",
+            method: "PUT",
             headers: {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",
@@ -36,4 +36,4 @@ const POST = async(
     }
 }
 
-export { POST }
+export { PUT }

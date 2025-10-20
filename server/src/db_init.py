@@ -2,11 +2,15 @@
 
 from sqlalchemy import create_engine, inspect
 from sqlmodel import SQLModel, Session, select
+import threading
 
 from src.models.db_models import User
 from src.env import sqlite_url
 from src.utils.authentication_utils import get_password_hash
 from datetime import datetime, timezone
+
+# Global lock for serializing database access
+db_lock = threading.Lock()
 
 # Define the engine globally. 
 # connect_args is needed for SQLite to work with multiple threads, which FastAPI can use.
@@ -41,5 +45,6 @@ def initialize_database():
             session.commit()
 
 def get_session():
-    with Session(engine) as session:
-        yield session
+    with db_lock:
+        with Session(engine) as session:
+            yield session

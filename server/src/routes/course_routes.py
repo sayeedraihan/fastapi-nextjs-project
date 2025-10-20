@@ -26,7 +26,7 @@ def read_course(*, session: Session = Depends(get_session), course_id: int, curr
 def update_course(*, session: Session = Depends(get_session), course_id: int, course: Course, current_user: Annotated[User, admin_dependency]):
     return course_service.update_course(session, course_id, course, current_user.username)
 
-@router.delete("/courses/{course_id}", response_model=bool)
+@router.put("/courses/{course_id}", response_model=bool)
 def delete_course(*, session: Session = Depends(get_session), course_id: int, current_user: Annotated[User, admin_dependency]):
-    return course_service.delete_course(session, course_id)
+    return course_service.delete_course(session, course_id, current_user.username)
 
