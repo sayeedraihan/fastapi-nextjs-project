@@ -9,6 +9,7 @@ import { useUtilsObject } from "@/app/contexts/utils_context";
 import { useModal } from "@/app/hooks/modal/useModal";
 import Modal from "@/app/custom-components/modal/modal";
 import { useRouter } from 'next/navigation';
+import { useAuth } from "@/app/contexts/auth-context";
 
 export type StudentDetailsParams = {
     studentId: string;
@@ -28,10 +29,11 @@ const StudentDetails = ({
     const [ student, setStudent ] = useState<Student>({ id: -1 });
     const [ updatedStudent, setUpdatedStudent ] = useState<Student>( { id: -1 } );
     const [ isUpdateButtonDisabled, setUpdateButtonDisabled ] = useState<boolean>(true);
+    const { isOpen, showModal, hideModal, message } = useModal();
     const { originalStudentList, selectedStudent, setSelectedStudent } = useStudent();
+    const { role } = useAuth();
     const { utilsObject } = useUtilsObject();
     const [isCredentialsModalOpen, setCredentialsModalOpen] = useState(false);
-    const { isOpen, showModal, hideModal, message } = useModal();
     const [username, setUsername] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
@@ -83,53 +85,6 @@ const StudentDetails = ({
         }
         return true;
     }
-
-    useEffect(() => {
-        fetchStudentById(studentId, setSelectedStudent, setStudent, setError, setLoading, setUpdatedStudent);
-    }, [studentId, setSelectedStudent]);
-
-    useEffect(() => {
-        const noChangeDone = (): boolean => {
-            return (
-                selectedStudent.id === updatedStudent.id
-                && selectedStudent.name === updatedStudent.name 
-                && selectedStudent.roll === updatedStudent.roll
-                && selectedStudent.level === updatedStudent.level 
-                && selectedStudent.section === updatedStudent.section
-                && selectedStudent.medium === updatedStudent.medium
-            )
-        }
-        if(noChangeDone() || updatedStudent.id == -1) {
-            return;
-        }
-        const updateSelectedStudent = async() => {
-            try {
-                const response = await fetch(`/routes/update-student`, {
-                    method: "PUT",
-                    headers: { "Content-Type" : "application/json" },
-                    body: JSON.stringify(updatedStudent),
-                });
-
-                if(!response.ok) {
-                    const responseText = await response.json();
-                    throw new Error("Failed to update student. Reason: " + responseText);
-                } else {
-                    const data: StudentUpdateResponseParams = await response.json();
-                    setSelectedStudent(JSON.parse(data.updated_student));
-                    setStudent(JSON.parse(data.updated_student));
-                    setUpdatedStudent(JSON.parse(data.updated_student));
-                    showModal(data.response_message);
-                }
-            } catch(err: unknown) {
-                if(err instanceof Error) {
-                    throw new Error(err.message);
-                } else {
-                    throw new Error("Error message thrown from /student-details/[studentId]/page.tsx catch statement. Reason unknown.");
-                }
-            }
-        }
-        updateSelectedStudent();
-    }, [updatedStudent, setSelectedStudent, selectedStudent, showModal]);
 
     const handleOpenCredentialsModal = async () => {
         if (student.user_id) {
@@ -252,6 +207,61 @@ const StudentDetails = ({
             }
         }
     };
+
+    useEffect(() => {
+        fetchStudentById(studentId, setSelectedStudent, setStudent, setError, setLoading, setUpdatedStudent);
+    }, [studentId, setSelectedStudent]);
+
+    useEffect(() => {
+        const noChangeDone = (): boolean => {
+            return (
+                selectedStudent.id === updatedStudent.id
+                && selectedStudent.name === updatedStudent.name 
+                && selectedStudent.roll === updatedStudent.roll
+                && selectedStudent.level === updatedStudent.level 
+                && selectedStudent.section === updatedStudent.section
+                && selectedStudent.medium === updatedStudent.medium
+            )
+        }
+        if(noChangeDone() || updatedStudent.id == -1) {
+            return;
+        }
+        const updateSelectedStudent = async() => {
+            try {
+                const response = await fetch(`/routes/update-student`, {
+                    method: "PUT",
+                    headers: { "Content-Type" : "application/json" },
+                    body: JSON.stringify(updatedStudent),
+                });
+
+                if(!response.ok) {
+                    const responseText = await response.json();
+                    throw new Error("Failed to update student. Reason: " + responseText);
+                } else {
+                    const data: StudentUpdateResponseParams = await response.json();
+                    setSelectedStudent(JSON.parse(data.updated_student));
+                    setStudent(JSON.parse(data.updated_student));
+                    setUpdatedStudent(JSON.parse(data.updated_student));
+                    showModal(data.response_message);
+                }
+            } catch(err: unknown) {
+                if(err instanceof Error) {
+                    throw new Error(err.message);
+                } else {
+                    throw new Error("Error message thrown from /student-details/[studentId]/page.tsx catch statement. Reason unknown.");
+                }
+            }
+        }
+        updateSelectedStudent();
+    }, [updatedStudent, setSelectedStudent, selectedStudent, showModal]);
+
+    if (role !== "A") {
+        return (
+            <div className="p-4 text-center text-destructive">
+                You do not have permission to access this resource
+            </div>
+        );
+    }
 
     if(loading) {
         return (

@@ -7,12 +7,14 @@ import Table from "./table/table"
 import { convertResponseToStudentList } from "../students"
 import Filter from "./filter/page"
 import { catchError } from "@/app/routes/route_utils"
+import { useAuth } from "@/app/contexts/auth-context"
 
 const StudentList = () => {
     const [ loading, setLoading ] = useState(true);
     const [ error ] = useState<string | null>(null);
     const [ initialLoad, setInitialLoad ] = useState<boolean>(true);
     const { resultantStudentList, setOriginalStudentList, setResultantStudentList } = useStudent();
+    const { role } = useAuth();
 
     useEffect(() => {
         if(!initialLoad) {
@@ -45,6 +47,14 @@ const StudentList = () => {
 
         fetchStudents();
     }, [initialLoad, setOriginalStudentList, setResultantStudentList]);
+
+    if (role !== "A") {
+        return (
+            <div className="p-4 text-center text-destructive">
+                You do not have permission to access this resource
+            </div>
+        );
+    }
 
     if(loading) {
         return (

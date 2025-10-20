@@ -7,8 +7,10 @@ import Modal from '../../custom-components/modal/modal';
 import { catchError } from '../../routes/route_utils';
 import { Course } from '../course';
 import { useCourse } from '@/app/contexts/course-context';
+import { useAuth } from '@/app/contexts/auth-context';
 
 const CourseForm = () => {
+    const { role } = useAuth();
     const { selectedCourse, setSelectedCourse } = useCourse();
     const [isEditMode, setIsEditMode] = useState(false);
     
@@ -32,6 +34,14 @@ const CourseForm = () => {
     const { isOpen: isCancelModalOpen, showModal: showCancelModal, hideModal: hideCancelModal, message: cancelMessage, onOk: onCancelConfirm } = useModal();
     const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
     const [newCourseCode, setNewCourseCode] = useState('');
+
+    if (role !== "A") {
+        return (
+            <div className="p-4 text-center text-destructive">
+                You do not have permission to access this resource
+            </div>
+        );
+    }
 
     useEffect(() => {
         if (selectedCourse) {

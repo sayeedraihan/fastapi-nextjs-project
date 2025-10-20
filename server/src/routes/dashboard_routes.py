@@ -50,10 +50,6 @@ def get_dashboard_data(*,
         )
         print("Student")
     else:
-        """ raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to access this resource"
-        ) """
         print("Error")
         response = DashboardRequestResponse()
         response.message = "You do not have permission to access this resource."

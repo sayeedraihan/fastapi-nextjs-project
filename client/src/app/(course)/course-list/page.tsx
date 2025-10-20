@@ -8,13 +8,15 @@ import Modal from "@/app/custom-components/modal/modal";
 import { useCourse } from "@/app/contexts/course-context";
 import { Course } from "../course";
 import { catchError } from "@/app/routes/route_utils";
+import { useAuth } from "@/app/contexts/auth-context";
 
 const CourseList = () => {
     const { courses, setCourses, setSelectedCourse } = useCourse();
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const router = useRouter();
     const { isOpen, showModal, hideModal, message } = useModal();
+    const { role } = useAuth();
+    const [loading, setLoading] = useState(true);
+    const [error] = useState<string | null>(null);
+    const router = useRouter();
     const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
 
     const fetchCourses = async () => {
@@ -36,10 +38,6 @@ const CourseList = () => {
             setLoading(false);
         }
     };
-
-    useEffect(() => {
-        fetchCourses();
-    }, [setCourses]);
 
     const handleEditClick = (course: Course) => {
         setSelectedCourse(course);
@@ -74,6 +72,18 @@ const CourseList = () => {
             setCourseToDelete(null);
         }
     };
+
+    useEffect(() => {
+        fetchCourses();
+    }, [setCourses]);
+
+    if (role !== "A") {
+        return (
+            <div className="p-4 text-center text-destructive">
+                You do not have permission to access this resource
+            </div>
+        );
+    }
 
     if (loading) return <p>Loading courses...</p>;
     if (error) return <p className="text-destructive">Error: {error}</p>;

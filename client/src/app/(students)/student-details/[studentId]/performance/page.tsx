@@ -7,57 +7,20 @@ import { useModal } from "../../../../hooks/modal/useModal";
 import Modal from "../../../../custom-components/modal/modal";
 import { catchError } from "@/app/routes/route_utils";
 import { Course } from "@/app/(course)/course";
+import { useAuth } from "@/app/contexts/auth-context";
 
 // This component displays and manages the performance records for a selected student.
 const PerformancePage = () => {
     // State management for student, courses, performances, loading, and errors.
+    const { isOpen, showModal, hideModal, message } = useModal();
+    const { role } = useAuth();
     const { selectedStudent } = useStudent();
     const [courses, setCourses] = useState<Course[]>([]);
     const [performances, setPerformances] = useState<Performance[]>([]);
     const [originalPerformances, setOriginalPerformances] = useState<Performance[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { isOpen, showModal, hideModal, message } = useModal();
     const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
-
-    // Effect to fetch initial data (courses and student's performances).
-    useEffect(() => {
-        const fetchData = async () => {
-            if (!selectedStudent || !selectedStudent.id) {
-                setLoading(false);
-                setError("No student selected. Please go to the student list and select a student.");
-                return;
-            }
-
-            try {
-                const response = await fetch('/routes/get-courses-and-student-performance', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ student_id: selectedStudent.id }),
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || "Failed to fetch data");
-                }
-
-                const data = await response.json();
-                setCourses(data.courses);
-                setPerformances(data.performances);
-                setOriginalPerformances(data.performances as Performance[]); // Store original state for cancel functionality
-            } catch (error: unknown) {
-                catchError(
-                    error, 
-                    "Error caught during get-courses-and-student-performance. Reason: ", 
-                    "Error caught during get-courses-and-student-performance"
-                );
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [selectedStudent]);
 
     // Handles adding a new, empty, editable row to the performance table.
     const handleAddRow = () => {
@@ -171,6 +134,53 @@ const PerformancePage = () => {
         }
         setEditingRowIndex(null);
     };
+
+    // Effect to fetch initial data (courses and student's performances).
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!selectedStudent || !selectedStudent.id) {
+                setLoading(false);
+                setError("No student selected. Please go to the student list and select a student.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/routes/get-courses-and-student-performance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_id: selectedStudent.id }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || "Failed to fetch data");
+                }
+
+                const data = await response.json();
+                setCourses(data.courses);
+                setPerformances(data.performances);
+                setOriginalPerformances(data.performances as Performance[]); // Store original state for cancel functionality
+            } catch (error: unknown) {
+                catchError(
+                    error, 
+                    "Error caught during get-courses-and-student-performance. Reason: ", 
+                    "Error caught during get-courses-and-student-performance"
+                );
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [selectedStudent]);
+
+    if (role !== "A") {
+        return (
+            <div className="p-4 text-center text-destructive">
+                You do not have permission to access this resource
+            </div>
+        );
+    }
 
     // Render loading state
     if (loading) {

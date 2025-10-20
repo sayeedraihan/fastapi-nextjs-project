@@ -8,6 +8,7 @@ import { Student, StudentBase } from "../students";
 import { useUtilsObject } from "@/app/contexts/utils_context";
 import { useModal } from "@/app/hooks/modal/useModal";
 import Modal from "@/app/custom-components/modal/modal";
+import { useAuth } from "@/app/contexts/auth-context";
 
 const demoStudent: StudentBase = { name: "", roll: 0, level: "", section: "" }
 
@@ -22,6 +23,7 @@ const CreateStudent = () => {
     const [ isCreateButtonDisabled, setCreateButtonDisabled ] = useState<boolean>(true);
     const [ newStudent, setNewStudent ] = useState<StudentBase | null>( null );
     const [ warningMessage, setWarningMessage ] = useState("");
+    const { role } = useAuth();
     const { originalStudentList, setSelectedStudent } = useStudent();
     const { utilsObject } = useUtilsObject();
     const { isOpen, showModal, hideModal } = useModal();
@@ -78,6 +80,14 @@ const CreateStudent = () => {
                 medium: studentMediumSelectRef.current ? studentMediumSelectRef.current.value : ""
             });
         }
+    }
+
+    if (role !== "A") {
+        return (
+            <div className="p-4 text-center text-destructive">
+                You do not have permission to access this resource
+            </div>
+        );
     }
 
     useEffect(() => {

@@ -20,11 +20,6 @@ const Header = () => {
             roles: ["A"]
         },
         {
-            linkName: "Student Details",
-            linkUrl: `/student-details/${selectedStudent.id}`,
-            roles: ["A"]
-        },
-        {
             linkName: "Add New Students",
             linkUrl: "/create-student",
             roles: ["A"]
