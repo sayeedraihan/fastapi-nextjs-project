@@ -44,9 +44,6 @@ class StudentUpdateResponseParams(SQLModel):
 
 class LoginResponse(BaseModel):
     token: Token
-    levels: list[Dict[str, str]]
-    mediums: list[Dict[str, str]]
-    fields: list[Dict[str, str]]
     student: Optional[Student] = None
     role: str
 

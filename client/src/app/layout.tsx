@@ -3,7 +3,6 @@ import "./globals.css";
 import Header from "./header/page";
 import { StudentContextProvider } from "./contexts/student-context";
 import Footer from "./footer/page";
-import { UtilsObjectContextProvider } from "./contexts/utils_context";
 import { AuthContextProvider } from "./contexts/auth-context";
 import { CourseContextProvider } from "./contexts/course-context";
 
@@ -21,19 +20,17 @@ export default function RootLayout({
 		<html lang="en" className="h-full">
 			<body className="flex flex-row justify-center items-center h-full bg-background text-textprimary">
 				<AuthContextProvider>
-					<UtilsObjectContextProvider>
-						<StudentContextProvider>
-							<CourseContextProvider>
-									<div className="flex flex-col h-full py-5 w-full max-w-7xl">
-										<Header />
-										<div className={`bg-surface flex-grow overflow-y-auto`}>
-											{children}
-										</div>
-										<Footer />
+					<StudentContextProvider>
+						<CourseContextProvider>
+								<div className="flex flex-col h-full py-5 w-full max-w-7xl">
+									<Header />
+									<div className={`bg-surface flex-grow overflow-y-auto`}>
+										{children}
 									</div>
-								</CourseContextProvider>
-							</StudentContextProvider>
-					</UtilsObjectContextProvider>
+									<Footer />
+								</div>
+							</CourseContextProvider>
+						</StudentContextProvider>
 				</AuthContextProvider>
 			</body>
 		</html>

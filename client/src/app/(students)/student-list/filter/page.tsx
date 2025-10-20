@@ -1,17 +1,18 @@
 "use client"
 
-import { useUtilsObject } from "@/app/contexts/utils_context";
 import { useEffect, useState } from "react";
 
 import { useStudent } from "@/app/contexts/student-context";
+import { catchError } from "@/app/routes/route_utils";
 
 export type StudentFilterParams = {
     prop: string;
     val: string;
 }
 
-const Filter = () => {
+type EnumOption = { [key: string]: string };
 
+const Filter = () => {
     const [ selectedProperty, setSelectedProperty ] = useState<string>("id");
     const [ selectedValue, setSelectedValue ] = useState<string>("");
     const [ fieldType, setFieldType ] = useState<string>("input");
@@ -19,40 +20,10 @@ const Filter = () => {
     const [ options, setOptions ] = useState<{ [key: string]: string; }[]>([]);
     const [ isFilterButtonDisabled, setFilterButtonDisabled ] = useState<boolean>(true);
 
-
-    const { utilsObject  } = useUtilsObject();
     const { originalStudentList, setResultantStudentList } = useStudent();
-
-    const fields = utilsObject.fields;
-    const levels = utilsObject.levels;
-    const mediums = utilsObject.mediums;
-
-    useEffect(() => {
-        if(selectedValue === "") {
-            setFilterButtonDisabled(true);
-        } else {
-            setFilterButtonDisabled(false);
-        }
-    }, [selectedValue]);
-
-    useEffect(() => {
-        setSelectedValue("");
-        if(["id", "name", "section", "all"].includes(selectedProperty)) {
-            setFieldType("input");
-            if(["name", "section", "all"].includes(selectedProperty)) {
-                setInputType("text");
-            } else {
-                setInputType("number");
-            }
-        } else if(["level", "medium"].includes(selectedProperty)) {
-            setFieldType("select");
-            if("level" === selectedProperty) {
-                setOptions(levels);
-            } else if("medium" === selectedProperty) {
-                setOptions(mediums);
-            }
-        }
-    }, [selectedProperty, levels, mediums]);
+    const [ fields, setFields ] = useState<EnumOption[]>([]);
+    const [ levels, setLevels ] = useState<EnumOption[]>([]);
+    const [ mediums, setMediums ] = useState<EnumOption[]>([]);
 
     const onClearFilterClicked = () => {
         setSelectedValue("");
@@ -83,6 +54,57 @@ const Filter = () => {
         });
         setResultantStudentList(filteredList);
     }
+
+    useEffect(() => {
+        if(selectedValue === "") {
+            setFilterButtonDisabled(true);
+        } else {
+            setFilterButtonDisabled(false);
+        }
+    }, [selectedValue]);
+
+    useEffect(() => {
+        setSelectedValue("");
+        if(["id", "name", "section", "all"].includes(selectedProperty)) {
+            setFieldType("input");
+            if(["name", "section", "all"].includes(selectedProperty)) {
+                setInputType("text");
+            } else {
+                setInputType("number");
+            }
+        } else if(["level", "medium"].includes(selectedProperty)) {
+            setFieldType("select");
+            if("level" === selectedProperty) {
+                setOptions(levels);
+            } else if("medium" === selectedProperty) {
+                setOptions(mediums);
+            }
+        }
+    }, [selectedProperty, levels, mediums]);
+
+    useEffect(() => {
+        const fetchEnums = async () => {
+            try {
+            const response = await fetch("/routes/get-utils", {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch filter data');
+            }
+
+            let allEnums = await response.json();
+            setFields(allEnums[0]);
+            setLevels(allEnums[1]);
+            setMediums(allEnums[2]);
+
+            } catch (error: unknown) {
+                catchError(error, "Error fetching enums: ", "Unknown error fetching enums");
+            }
+        };
+        fetchEnums();
+    }, []);
 
     return (
         <form className="p-2" onSubmit={(e) => onFilterSubmit(e)}>

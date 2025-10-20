@@ -37,14 +37,8 @@ def get_token(*, session: Session = Depends(get_session), #loading_fix
     student_details: Student | None = None
     if user.role == "S":
         student_details = student_service.get_student_details_by_user_id(session, user.id)
-    levels_enum: list[Dict[str, str]] = [ { level.name: level.value } for level in Level]
-    mediums_enum: list[Dict[str, str]] = [ { medium.name: medium.value } for medium in Medium]
-    fields: list[Dict[str, str]] = [ { field.name: field.value } for field in Field]
     login_response: LoginResponse = LoginResponse(
         token = token, 
-        levels = levels_enum, 
-        mediums = mediums_enum, 
-        fields = fields,
         student = student_details,
         role = user.role
     )
