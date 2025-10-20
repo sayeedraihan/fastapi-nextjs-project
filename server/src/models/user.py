@@ -3,7 +3,9 @@ from typing import Any
 
 from sqlmodel import SQLModel, Field
 
-class UserBase(SQLModel):
+from src.models.audit_model import AuditModel
+
+class UserBase(AuditModel):
     username: str = Field(unique=True, index=True)
     email: str | None = None
     full_name: str | None = None

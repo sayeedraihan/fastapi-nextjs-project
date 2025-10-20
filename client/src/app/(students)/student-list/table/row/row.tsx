@@ -5,6 +5,7 @@ import DataCell from "../cell/dataCell/dataCell";
 import HeadCell from "../cell/headCell/headCell"
 import { handleTableRowClickEvent } from "@/app/(students)/students";
 import { useRouter } from "next/navigation";
+import { formatUtcToLocal } from "@/app/utils/datetime";
 
 export type TableRowProps = {
     columnHeaders: string[];
@@ -31,6 +32,13 @@ const TableRow = ({columnHeaders, rowData, onDeleteClick, index}: TableRowProps)
         )
     } else if(rowData) {
         const studentId = rowData.id;
+        
+        // Define keys to exclude from the main data loop
+        const excludeKeys = new Set([
+            "id", "user_id", 
+            "created_at", "created_by", 
+            "updated_at", "updated_by"
+        ]);
         return (
             <tr className={`text-textprimary hover:bg-primary/25 hover:text-textprimary`}>
                 <td
@@ -40,7 +48,7 @@ const TableRow = ({columnHeaders, rowData, onDeleteClick, index}: TableRowProps)
                     {index}
                 </td>
                 {Object.entries(rowData).map(([key, value]) => {
-                    if(key == "user_id" || key == "id") {
+                    if(excludeKeys.has(key)) {
                         return null;
                     }
                     return (
@@ -52,6 +60,17 @@ const TableRow = ({columnHeaders, rowData, onDeleteClick, index}: TableRowProps)
                         />
                     );
                 })}
+
+                <DataCell 
+                    cellData={rowData.updated_by? rowData.updated_by : "N/A"} 
+                    studentId={studentId}
+                />
+
+                <DataCell 
+                    cellData={formatUtcToLocal(rowData.updated_at)} 
+                    studentId={studentId}
+                />
+
                 <td className="border-subtle border-2 text-center">
                     {rowData.user_id ? '✓' : ''}
                 </td>

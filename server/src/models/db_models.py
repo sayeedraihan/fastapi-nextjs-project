@@ -4,11 +4,12 @@ from typing import Any, List, Optional
 from sqlalchemy.orm import Mapped
 from sqlmodel import Field, Relationship, SQLModel
 
+from src.models.audit_model import AuditModel
 from src.models.user import UserBase
 from src.models.course import CourseBase
 from src.models.student import StudentBase
 
-class Performance(SQLModel, table=True):
+class Performance(AuditModel, table=True):
     student_id: int = Field(default = None, primary_key = True, foreign_key = "student.id")
     course_id: int = Field(default = None, primary_key = True, foreign_key = "course.id")
     attendance: float = Field(default = 0.0)
