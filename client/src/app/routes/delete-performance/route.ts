@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { catchError } from "../route_utils";
 import { cookies } from "next/headers";
 
-const DELETE = async (request: NextRequest) => {
+const PUT = async (request: NextRequest) => {
     try {
         const { student_id, course_id } = await request.json();
         const sessionTokenCookie = (await cookies()).get("session_token");
         const token = sessionTokenCookie?.value;
 
         const apiResponse = await fetch("http://localhost:8000/delete-performance", {
-            method: "DELETE",
+            method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
@@ -36,4 +36,4 @@ const DELETE = async (request: NextRequest) => {
     }
 }
 
-export { DELETE }
+export { PUT }

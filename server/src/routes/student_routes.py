@@ -11,7 +11,7 @@ from src.models.student import StudentBase
 from src.db_init import get_session
 from src.service.student_service import student_service
 from src.models.db_models import Student
-from src.models.request_response_models import StudentUpdateResponseParams, StudentDeleteParams
+from src.models.request_response_models import BaseRequestResponse, StudentUpdateResponseParams, StudentDeleteParams
 from src.models.db_models import User
 from src.routes.base_routes import get_router
 from src.utils.user_utils import get_current_active_user, role_checker
@@ -30,9 +30,7 @@ def add_demo_student(*, session: Session = Depends(get_session)) -> list[Student
 def add_new_student(*, session: Session = Depends(get_session),
                     student_new: StudentBase, current_user: Annotated[User, admin_dependency]) -> Student:
     student = Student(**dict(student_new))
-    student.id = 0
-    setattr(session, 'student', student)
-    student = student_service.add_student(session)
+    student = student_service.add_student(session, student, current_user.username)
     return student
 
 @router.get("/get-all-students")
@@ -46,33 +44,27 @@ def get_all_students(*, session: Session = Depends(get_session), current_user: A
 def get_student_by_id(*, session: Session = Depends(get_session),
                       student_id: str,
                       current_user: Annotated[User, admin_dependency]):
-    query_id = int(student_id)
-    setattr(session, 'id', query_id)
-    students = student_service.select_student_by_id(session)
+    students = student_service.select_student_by_id(session, int(student_id))
     if not students:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Student found with this ID")
     return students
 
-@router.post("/update-student-by-id")
+@router.put("/update-student-by-id")
 def update_students_by_id(*, session: Session = Depends(get_session),
                           updated_student: Optional[Student] = None,
                           request: Request,
                           current_user: Annotated[User, admin_dependency]) -> JSONResponse:
-    request.session["updated_student"] = dict(updated_student)
-    request.session["id"] = updated_student.id
-    update_response: StudentUpdateResponseParams = student_service.update_student_by_id(session, request)
+    update_response: StudentUpdateResponseParams = student_service.update_student_by_id(session, updated_student, current_user.username)
 
     response: JSONResponse = JSONResponse(content=update_response.model_dump())
     return response
 
-@router.delete("/delete-student-by-id")
+@router.put("/delete-student-by-id")
 def delete_students_by_id(*, session: Session = Depends(get_session),
                           delete_params: Optional[StudentDeleteParams] = None,
                           current_user: Annotated[User, admin_dependency]):
-    setattr(session, "property", "id")
-    setattr(session, "value", delete_params.id)
-    students: list[Student] = student_service.delete_student_by_id(session)
-    if not students:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "No student deleted")
-    return students
+    response: BaseRequestResponse = student_service.delete_student_by_id(session, "id", delete_params.id, current_user.username)
+    if not response:
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = f"No student found with id = {delete_params.id}")
+    return response
 

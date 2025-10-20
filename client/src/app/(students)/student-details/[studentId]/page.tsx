@@ -105,7 +105,7 @@ const StudentDetails = ({
         const updateSelectedStudent = async() => {
             try {
                 const response = await fetch(`/routes/update-student`, {
-                    method: "POST",
+                    method: "PUT",
                     headers: { "Content-Type" : "application/json" },
                     body: JSON.stringify(updatedStudent),
                 });

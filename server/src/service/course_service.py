@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
-from sqlmodel import Session, select
+from sqlmodel import Session, select, update
+from datetime import datetime, timezone
 
 from src.models.db_models import Course, Performance
 
@@ -33,35 +34,52 @@ class CourseService:
         return results
 
     @staticmethod
-    def add_course(session: Session, course: Course) -> Course:
+    def add_course(session: Session, course: Course, creator_username: str) -> Course:
+        course.created_at = datetime.now(timezone.utc)
+        course.created_by = creator_username
+        course.updated_at = datetime.now(timezone.utc)
+        course.updated_by = creator_username
         session.add(course)
         session.commit()
         session.refresh(course)
         return course
 
     @staticmethod
-    def update_course(session: Session, course_id: int, course_data: Course) -> Course:
+    def update_course(session: Session, course_id: int, course_data: Course, updater_username: str) -> Course:
         course = CourseService.select_course_by_id(session, course_id)
         course.name = course_data.name
         course.course_code = course_data.course_code
         course.description = course_data.description
         course.credits = course_data.credits
+        course.updated_at = datetime.now(timezone.utc)
+        course.updated_by = updater_username
         session.add(course)
         session.commit()
         session.refresh(course)
         return course
 
     @staticmethod
-    def delete_course(session: Session, course_id: int) -> bool:
+    def delete_course(session: Session, course_id: int, deleted_by: str) -> bool:
+        now_utc = datetime.now(timezone.utc)
         # Also delete related performance records
-        statement = select(Performance).where(Performance.course_id == course_id)
-        results = session.exec(statement).all()
-        for result in results:
-            session.delete(result)
+        performance_update_statement = (
+            update(Performance)
+            .where(Performance.course_id == course_id)
+            .values(
+                deleted_at=now_utc,
+                deleted_by=deleted_by,
+                status="I"
+            )
+        )
+        session.exec(performance_update_statement)
 
         course = CourseService.select_course_by_id(session, course_id)
-        session.delete(course)
+        course.deleted_at = datetime.now(timezone.utc)
+        course.deleted_by = deleted_by
+        course.status = "I"
+        session.add(course)
         session.commit()
+        session.refresh(course)
         return True
 
     @staticmethod

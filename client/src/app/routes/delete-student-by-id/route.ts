@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { catchError } from "../route_utils";
 
-const DELETE = async(
+const PUT = async(
     request: NextRequest, 
     // context: { params: Promise<StudentDeleteParams> } // "npm run build" asked to use this instead of the above params.
 ) => {
@@ -14,7 +14,7 @@ const DELETE = async(
         const sessionTokenCookie = (await cookies()).get("session_token");
         const token = sessionTokenCookie?.value;
         const apiResponse = await fetch(`http://localhost:8000/delete-student-by-id`, {
-            method: "DELETE",
+            method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`,
@@ -39,4 +39,4 @@ const DELETE = async(
     }
 }
 
-export { DELETE }
+export { PUT }
