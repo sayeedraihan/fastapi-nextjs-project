@@ -10,7 +10,7 @@ import { useCourse } from '@/app/contexts/course-context';
 import { useAuth } from '@/app/contexts/auth-context';
 
 const CourseForm = () => {
-    const { role } = useAuth();
+    const { role, loading: authLoading } = useAuth();
     const { selectedCourse, setSelectedCourse } = useCourse();
     const [isEditMode, setIsEditMode] = useState(false);
     
@@ -34,43 +34,6 @@ const CourseForm = () => {
     const { isOpen: isCancelModalOpen, showModal: showCancelModal, hideModal: hideCancelModal, message: cancelMessage, onOk: onCancelConfirm } = useModal();
     const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
     const [newCourseCode, setNewCourseCode] = useState('');
-
-    if (role !== "A") {
-        return (
-            <div className="p-4 text-center text-destructive">
-                You do not have permission to access this resource
-            </div>
-        );
-    }
-
-    useEffect(() => {
-        if (selectedCourse) {
-            setIsEditMode(true);
-            const { id, name, course_code, description, credits } = selectedCourse;
-            setId(id);
-            setName(name);
-            setCourseCode(course_code);
-            setDescription(description || '');
-            setCredits(credits || 0);
-
-            // Set initial state for comparison
-            setInitialState({
-                name: name,
-                courseCode: course_code,
-                description: description || '',
-                credits: credits || 0,
-            });
-        } else {
-            setIsEditMode(false);
-            resetFormForCreate();
-        }
-    }, [selectedCourse]);
-    
-    // Effect to enable/disable save button
-    useEffect(() => {
-        setIsSaveDisabled(!hasChanges());
-    }, [name, courseCode, description, credits, initialState]);
-
 
     const resetFormForCreate = () => {
         setId(null);
@@ -151,6 +114,45 @@ const CourseForm = () => {
         setSelectedCourse(null);
         router.push('/course-list');
     };
+
+    useEffect(() => {
+        if (selectedCourse) {
+            setIsEditMode(true);
+            const { id, name, course_code, description, credits } = selectedCourse;
+            setId(id);
+            setName(name);
+            setCourseCode(course_code);
+            setDescription(description || '');
+            setCredits(credits || 0);
+
+            // Set initial state for comparison
+            setInitialState({
+                name: name,
+                courseCode: course_code,
+                description: description || '',
+                credits: credits || 0,
+            });
+        } else {
+            setIsEditMode(false);
+            resetFormForCreate();
+        }
+    }, [selectedCourse]);
+    
+    useEffect(() => {
+        setIsSaveDisabled(!hasChanges());
+    }, [name, courseCode, description, credits, initialState]);
+
+    if (authLoading) {
+        return <p>Loading...</p>;
+    }
+
+    if (role !== "A") {
+        return (
+            <div className="p-4 text-center text-destructive">
+                You do not have permission to access this resource
+            </div>
+        );
+    }
 
     return (
         <div className="p-4">

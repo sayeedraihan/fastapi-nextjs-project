@@ -65,6 +65,15 @@ const StudentList = () => {
         );
     }
 
+    // FIX: Add this block to show only the error if it exists
+    if (error) {
+        return (
+            <main className="flex flex-col items-center p-4">
+                <p className="text-destructive text-center">{error}</p>
+            </main>
+        );
+    }
+
     const columnHeaders = ["ID", "Name", "Roll", "Class", "Section", "Medium", "Updated By", "Updated At", "Credentials", "Actions"];
     return (
         <div className="mx-2 py-2 flex flex-col">

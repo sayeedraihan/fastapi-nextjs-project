@@ -7,7 +7,7 @@ import { useAuth } from "../contexts/auth-context"
 const Header = () => {
     const pathname = usePathname();
     const { selectedStudent } = useStudent();
-    const { role } = useAuth();
+    const { role, loading } = useAuth();
     const linkRefs = [
         {
             linkName: "Dashboard",
@@ -30,6 +30,26 @@ const Header = () => {
             roles: ["A"]
         }
     ]
+
+    if (loading) {
+        return (
+            <div 
+                className="
+                    mr-2
+                    h-12 w-full 
+                    py-8
+                    bg-surface shadow-lg 
+                    border-subtle border-b-2
+                    flex items-center justify-center 
+                    gap-x-4 sm:gap-x-6
+                    font-bold text-textprimary 
+                "
+            >
+                {/* Loading links... */}
+            </div>
+        );
+    }
+
     return (
         <div 
             className="

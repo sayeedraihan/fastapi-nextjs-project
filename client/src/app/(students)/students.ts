@@ -131,8 +131,8 @@ const fetchStudentById = async(studentId: string,
         });
 
         if(!response.ok) {
-            const result = await response.text();
-            throw new Error("Failed to fetch the student with ID: " + studentId + " result:  " + result);
+            const result = await response.json();
+            throw new Error(result.detail);
         } else {
             const responseClone = response.clone();
             const responseText = await responseClone.text();

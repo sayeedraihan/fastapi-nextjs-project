@@ -7,7 +7,6 @@ import { AddUserRequest, fetchStudentById, StudentUpdateResponseParams, User } f
 import { useModal } from "@/app/hooks/modal/useModal";
 import Modal from "@/app/custom-components/modal/modal";
 import { useRouter } from 'next/navigation';
-import { useAuth } from "@/app/contexts/auth-context";
 import { catchError } from "@/app/routes/route_utils";
 
 export type StudentDetailsParams = {
@@ -32,7 +31,6 @@ const StudentDetails = ({
     const [ isUpdateButtonDisabled, setUpdateButtonDisabled ] = useState<boolean>(true);
     const { isOpen, showModal, hideModal, message } = useModal();
     const { originalStudentList, selectedStudent, setSelectedStudent } = useStudent();
-    const { role } = useAuth();
     const [isCredentialsModalOpen, setCredentialsModalOpen] = useState(false);
     const [username, setUsername] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -277,14 +275,6 @@ const StudentDetails = ({
         };
         fetchEnums();
     }, []);
-
-    if (role !== "A") {
-        return (
-            <div className="p-4 text-center text-destructive">
-                You do not have permission to access this resource
-            </div>
-        );
-    }
 
     if(loading) {
         return (
