@@ -36,19 +36,15 @@ def get_dashboard_data(*,
         performances = performance_service.select_performance_by_student_id(session, student_details.id)
 
         if not student_details:
-            """ raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Student details not found for the current user"
-            ) """
             response = DashboardRequestResponse()
             response.message = "Student details not found for the current user."
             return response
         return StudentDashboardResponse(
             student=student_details,
             performances=performances,
+            courses=courses,
             role=Role.STUDENT
         )
-        print("Student")
     else:
         print("Error")
         response = DashboardRequestResponse()

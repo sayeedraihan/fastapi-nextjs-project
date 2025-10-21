@@ -1,3 +1,4 @@
+import { Course } from "../(course)/course";
 import { Student, Performance } from "../(students)/students";
 
 export type BaseRequestResponse = {
@@ -16,4 +17,5 @@ export type AdminDashboardResponse = {
 export type StudentDashboardResponse = {
     student: Student;
     performances: Performance[];
+    courses: Course[];
 } & DashboardRequestResponse;
