@@ -7,13 +7,13 @@ import { useModal } from "@/app/hooks/modal/useModal";
 import Modal from "@/app/custom-components/modal/modal";
 import { useCourse } from "@/app/contexts/course-context";
 import { Course } from "../course";
-import { catchError } from "@/app/routes/route_utils";
 import { useAuth } from "@/app/contexts/auth-context";
+import { catchError } from "@/app/routes/route_utils";
 
 const CourseList = () => {
     const { courses, setCourses, setSelectedCourse } = useCourse();
     const { isOpen, showModal, hideModal, message } = useModal();
-    const { role } = useAuth();
+    const { role, loading: authLoading } = useAuth();
     const [loading, setLoading] = useState(true);
     const [error] = useState<string | null>(null);
     const router = useRouter();
@@ -77,6 +77,10 @@ const CourseList = () => {
         fetchCourses();
     }, [setCourses]);
 
+    if (authLoading) {
+        return <p>Loading...</p>;
+    }
+
     if (role !== "A") {
         return (
             <div className="p-4 text-center text-destructive">
@@ -85,7 +89,15 @@ const CourseList = () => {
         );
     }
 
-    if (loading) return <p>Loading courses...</p>;
+    if(loading) {
+        return (
+            <main className="flex flex-col items-center">
+                {error && <p className="text-destructive">Error: {error} </p>}
+                {!error && <p className="text-textprimary">Loading...</p>}
+            </main>
+        );
+    }
+
     if (error) return <p className="text-destructive">Error: {error}</p>;
 
     return (

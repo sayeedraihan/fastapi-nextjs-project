@@ -13,7 +13,7 @@ import { useAuth } from "@/app/contexts/auth-context";
 const PerformancePage = () => {
     // State management for student, courses, performances, loading, and errors.
     const { isOpen, showModal, hideModal, message } = useModal();
-    const { role } = useAuth();
+    const { role, loading: authLoading } = useAuth();
     const { selectedStudent } = useStudent();
     const [courses, setCourses] = useState<Course[]>([]);
     const [performances, setPerformances] = useState<Performance[]>([]);
@@ -174,22 +174,19 @@ const PerformancePage = () => {
         fetchData();
     }, [selectedStudent]);
 
-    if (role !== "A") {
-        return (
-            <div className="p-4 text-center text-destructive">
-                You do not have permission to access this resource
-            </div>
-        );
-    }
-
     // Render loading state
-    if (loading) {
-        return <div className="p-4 text-center">Loading...</div>;
+    if(loading) {
+        return (
+            <main className="flex flex-col items-center">
+                {error && <p className="text-destructive">Error: {error} </p>}
+                {!error && <p className="text-textprimary">Loading...</p>}
+            </main>
+        );
     }
 
     // Render error state
     if (error) {
-        return <div className={`p-4 text-center text-destructive`}>Error: {error}</div>;
+        return <div className={`p-4 text-center text-destructive`}>{error}</div>;
     }
 
     // Main component render
