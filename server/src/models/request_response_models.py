@@ -30,6 +30,7 @@ class AdminDashboardResponse(DashboardRequestResponse):
 class StudentDashboardResponse(DashboardRequestResponse):
     student: Student
     performances: list[Performance]
+    courses: List[Course]
 
 class StudentDetailsParams(SQLModel):
     id: str = None
