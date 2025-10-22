@@ -28,34 +28,6 @@ const Filter = (
         setSelectedProperty("id");
         setFilterButtonDisabled(true);
         onFilterChange({ filter: undefined, value: undefined });
-        /* try {
-            const request: StudentListRequest = {
-                page: 1,
-                limit: 10,
-                filter: "",
-                value: ""
-            }
-            const response = await fetch(`/routes/get-all-students`, {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(request)
-
-            });
-            if(!response.ok) {
-                const responseText = await response.text();
-                throw new Error("Failed to fetch all students. Reason: " + responseText);
-            } else {
-                const responseClone = response.clone();
-                const responseText = await responseClone.text();
-                const objects: StudentListResponse = JSON.parse(responseText);
-                setResultantStudentList(convertResponseToStudentList(objects.students ?? []));
-            }
-        } catch (error: unknown) {
-            catchError(error,
-                "Could not fetch all students. Reason: ",
-                "Could not fetch all students. Reason unknown."
-            )
-        } */
     }
 
     const onFilterSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
@@ -116,19 +88,19 @@ const Filter = (
     useEffect(() => {
         const fetchEnums = async () => {
             try {
-            const response = await fetch("/routes/get-utils", {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            });
+                const response = await fetch("/routes/get-utils", {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch filter data');
-            }
+                if (!response.ok) {
+                    throw new Error('Failed to fetch filter data');
+                }
 
-            let allEnums = await response.json();
-            setFields(allEnums[0]);
-            setLevels(allEnums[1]);
-            setMediums(allEnums[2]);
+                let allEnums = await response.json();
+                setFields(allEnums[0]);
+                setLevels(allEnums[1]);
+                setMediums(allEnums[2]);
 
             } catch (error: unknown) {
                 catchError(error, "Error fetching enums: ", "Unknown error fetching enums");
