@@ -93,13 +93,16 @@ type StudentListResponse = {
     page_count?: number;
     students?: Student[];
 }
+
 type FilterProps = {
     onFilterChange: (payload : FilterPayload) => void;
+    currentFilters: FilterPayload
 }
 
 type FilterPayload = {
-    filter?: string | null;
-    value?: string | null; 
+    property?: string;
+    value?: string;
+    activeFilter: boolean;
 }
 
 type EnumOption = { [key: string]: string };
