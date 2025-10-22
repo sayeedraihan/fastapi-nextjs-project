@@ -2,17 +2,16 @@
 
 import { useEffect, useState } from "react";
 
-import { Student } from "@/app/contexts/student-context";
 import { catchError } from "@/app/routes/route_utils";
 import { useForm } from "react-hook-form";
-import { EnumOption, FilterProps, StudentListRequest } from "../../students";
-
+import { EnumOption, FilterProps } from "../../students";
 
 const Filter = (
-    { onFilterChange }: FilterProps
+    { onFilterChange, currentFilters }: FilterProps
 ) => {
-    const [ selectedProperty, setSelectedProperty ] = useState<string>("id");
-    const [ selectedValue, setSelectedValue ] = useState<string>("");
+    const [ selectedProperty, setSelectedProperty ] = useState<string | undefined>(currentFilters.property);
+    const [ selectedValue, setSelectedValue ] = useState<string | undefined>(currentFilters.value);
+    const [ activeFilter, setActiveFilter ] = useState<boolean>(currentFilters.activeFilter);
     const [ fieldType, setFieldType ] = useState<string>("input");
     const [ inputType, setInputType ] = useState<string>("number");
     const [ options, setOptions ] = useState<{ [key: string]: string; }[]>([]);
@@ -25,41 +24,15 @@ const Filter = (
 
     const onClearFilterClicked = async() => {
         setSelectedValue("");
+        setActiveFilter(false);
         setSelectedProperty("id");
         setFilterButtonDisabled(true);
-        onFilterChange({ filter: undefined, value: undefined });
+        onFilterChange({ property: undefined, value: undefined, activeFilter: false });
     }
 
     const onFilterSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onFilterChange( { filter: selectedProperty, value: selectedValue } );
-        try {
-            const filterParams: StudentListRequest = {
-                page: 1,
-                limit: 10,
-                filter: selectedProperty,
-                value: selectedValue
-            }
-            const response = await fetch(`/routes/get-all-students`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(filterParams),
-            });
-
-            if(!response.ok) {
-                const responseText = await response.text();
-                throw new Error("Failed to fetch filtered student list. Reason: " + responseText);
-            } else {
-                const responseClone = response.clone();
-                const responseText = await responseClone.text();
-                const objects: Student[] = JSON.parse(responseText);
-            }
-        } catch (error: unknown) {
-            catchError(error,
-                "Could not fetch students according to the filter. Reason: ",
-                "Could not fetch students according to the filter. Reason unknown."
-            )
-        }
+        onFilterChange({ property: selectedProperty, value: selectedValue, activeFilter: true });
     }
 
     useEffect(() => {
@@ -67,15 +40,18 @@ const Filter = (
     }, [selectedValue]);
 
     useEffect(() => {
-        setSelectedValue("");
-        if(["id", "name", "section", "roll"].includes(selectedProperty)) {
+        setSelectedValue(activeFilter ? currentFilters.value : "");
+    }, [selectedProperty])
+
+    useEffect(() => {
+        if(selectedProperty && ["id", "name", "section", "roll"].includes(selectedProperty)) {
             setFieldType("input");
             if(["name", "section"].includes(selectedProperty)) {
                 setInputType("text");
             } else {
                 setInputType("number");
             }
-        } else if(["level", "medium"].includes(selectedProperty)) {
+        } else if(selectedProperty && ["level", "medium"].includes(selectedProperty)) {
             setFieldType("select");
             if("level" === selectedProperty) {
                 setOptions(levels);
@@ -177,7 +153,7 @@ const Filter = (
                                 bg-surface 
                             "
                         >
-                            <option value="" disabled>--Please choose an option--</option>
+                            <option value="">--Please choose an option--</option>
                             {options.map((option, index) => {
                                 const [key, value] = Object.entries(option)[0];
                                 return (
