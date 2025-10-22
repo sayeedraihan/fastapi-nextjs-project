@@ -2,17 +2,15 @@
 
 import { useEffect, useState } from "react";
 
-import { useStudent } from "@/app/contexts/student-context";
+import { Student } from "@/app/contexts/student-context";
 import { catchError } from "@/app/routes/route_utils";
+import { useForm } from "react-hook-form";
+import { EnumOption, FilterProps, StudentListRequest } from "../../students";
 
-export type StudentFilterParams = {
-    prop: string;
-    val: string;
-}
 
-type EnumOption = { [key: string]: string };
-
-const Filter = () => {
+const Filter = (
+    { onFilterChange }: FilterProps
+) => {
     const [ selectedProperty, setSelectedProperty ] = useState<string>("id");
     const [ selectedValue, setSelectedValue ] = useState<string>("");
     const [ fieldType, setFieldType ] = useState<string>("input");
@@ -20,54 +18,87 @@ const Filter = () => {
     const [ options, setOptions ] = useState<{ [key: string]: string; }[]>([]);
     const [ isFilterButtonDisabled, setFilterButtonDisabled ] = useState<boolean>(true);
 
-    const { originalStudentList, setResultantStudentList } = useStudent();
+    const { handleSubmit, formState: {} } = useForm();
     const [ fields, setFields ] = useState<EnumOption[]>([]);
     const [ levels, setLevels ] = useState<EnumOption[]>([]);
     const [ mediums, setMediums ] = useState<EnumOption[]>([]);
 
-    const onClearFilterClicked = () => {
+    const onClearFilterClicked = async() => {
         setSelectedValue("");
         setSelectedProperty("id");
-        setResultantStudentList(originalStudentList);
         setFilterButtonDisabled(true);
+        onFilterChange({ filter: undefined, value: undefined });
+        /* try {
+            const request: StudentListRequest = {
+                page: 1,
+                limit: 10,
+                filter: "",
+                value: ""
+            }
+            const response = await fetch(`/routes/get-all-students`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(request)
+
+            });
+            if(!response.ok) {
+                const responseText = await response.text();
+                throw new Error("Failed to fetch all students. Reason: " + responseText);
+            } else {
+                const responseClone = response.clone();
+                const responseText = await responseClone.text();
+                const objects: StudentListResponse = JSON.parse(responseText);
+                setResultantStudentList(convertResponseToStudentList(objects.students ?? []));
+            }
+        } catch (error: unknown) {
+            catchError(error,
+                "Could not fetch all students. Reason: ",
+                "Could not fetch all students. Reason unknown."
+            )
+        } */
     }
 
-    const onFilterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const onFilterSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const filteredList = originalStudentList.filter(student => {
-            if (selectedProperty === "all") {
-                const selectedValueString = selectedValue.toLowerCase();
-                return (
-                    student.name && student.name.toLowerCase().includes(selectedValueString) ||
-                    student.section && student.section.toLowerCase().includes(selectedValueString) ||
-                    student.medium && student.medium.toLowerCase().includes(selectedValueString)
-                );
-            } else {
-                const studentValue = student[selectedProperty as keyof typeof student];
-                if (studentValue !== undefined && studentValue !== null) {
-                    const studentValueString = studentValue.toString().toLowerCase();
-                    const selectedValueString = selectedValue.toLowerCase();
-                    return studentValueString === selectedValueString;
-                }
+        onFilterChange( { filter: selectedProperty, value: selectedValue } );
+        try {
+            const filterParams: StudentListRequest = {
+                page: 1,
+                limit: 10,
+                filter: selectedProperty,
+                value: selectedValue
             }
-            return false;
-        });
-        setResultantStudentList(filteredList);
+            const response = await fetch(`/routes/get-all-students`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(filterParams),
+            });
+
+            if(!response.ok) {
+                const responseText = await response.text();
+                throw new Error("Failed to fetch filtered student list. Reason: " + responseText);
+            } else {
+                const responseClone = response.clone();
+                const responseText = await responseClone.text();
+                const objects: Student[] = JSON.parse(responseText);
+            }
+        } catch (error: unknown) {
+            catchError(error,
+                "Could not fetch students according to the filter. Reason: ",
+                "Could not fetch students according to the filter. Reason unknown."
+            )
+        }
     }
 
     useEffect(() => {
-        if(selectedValue === "") {
-            setFilterButtonDisabled(true);
-        } else {
-            setFilterButtonDisabled(false);
-        }
+        setFilterButtonDisabled(selectedValue === "");
     }, [selectedValue]);
 
     useEffect(() => {
         setSelectedValue("");
-        if(["id", "name", "section", "all"].includes(selectedProperty)) {
+        if(["id", "name", "section", "roll"].includes(selectedProperty)) {
             setFieldType("input");
-            if(["name", "section", "all"].includes(selectedProperty)) {
+            if(["name", "section"].includes(selectedProperty)) {
                 setInputType("text");
             } else {
                 setInputType("number");
@@ -107,7 +138,7 @@ const Filter = () => {
     }, []);
 
     return (
-        <form className="p-2" onSubmit={(e) => onFilterSubmit(e)}>
+        <form className="p-2" onSubmit={onFilterSubmit}>
             <div className="flex flex-col items-center">
                 <div>
                     <label htmlFor="field">Field: </label>
@@ -125,7 +156,6 @@ const Filter = () => {
                         "
                     >
                         <option value="" disabled>--Please choose an option--</option>
-                        <option value="all">All</option>
                         {fields.map((field, index) => {
                             const [key, value] = Object.entries(field)[0];
                             return (

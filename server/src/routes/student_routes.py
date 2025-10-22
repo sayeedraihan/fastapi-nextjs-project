@@ -11,7 +11,7 @@ from src.models.student import StudentBase
 from src.db_init import get_session
 from src.service.student_service import student_service
 from src.models.db_models import Student
-from src.models.request_response_models import BaseRequestResponse, StudentUpdateResponseParams, StudentDeleteParams
+from src.models.request_response_models import BaseRequestResponse, StudentListRequest, StudentListResponse, StudentUpdateResponseParams, StudentDeleteParams
 from src.models.db_models import User
 from src.routes.base_routes import get_router
 from src.utils.user_utils import get_current_active_user, role_checker
@@ -33,12 +33,16 @@ def add_new_student(*, session: Session = Depends(get_session),
     student = student_service.add_student(session, student, current_user.username)
     return student
 
-@router.get("/get-all-students")
-def get_all_students(*, session: Session = Depends(get_session), current_user: Annotated[User, admin_dependency]):
-    students: list[Student] = student_service.select_all_students(session)
-    if not students:
+@router.post("/get-all-students")
+def get_all_students(*, session: Session = Depends(get_session), 
+                    current_user: Annotated[User, admin_dependency],
+                    student_list_request: StudentListRequest):
+    student_list_response: StudentListResponse = student_service.get_paginated_student_list(
+        session, student_list_request.filter, student_list_request.value, student_list_request.page, student_list_request.limit
+    )
+    if not student_list_response.students:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "No students found")
-    return students
+    return student_list_response
 
 @router.get("/get-student-by-id/{student_id}")
 def get_student_by_id(*, session: Session = Depends(get_session),

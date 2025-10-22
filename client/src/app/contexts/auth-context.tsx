@@ -26,7 +26,7 @@ const AuthContextProvider = ({
     useEffect(() => {
         const fetchUserRole = async () => {
             try {
-                const response = await fetch('/api/get-user-role');
+                const response = await fetch('/routes/get-user-role');
                 if (response.ok) {
                     const data = await response.json();
                     setRole(data.role);
