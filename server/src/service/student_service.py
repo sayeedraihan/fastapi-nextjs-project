@@ -1,3 +1,5 @@
+from math import ceil
+from typing import Optional
 from fastapi import HTTPException, status
 from sqlalchemy import func
 from sqlmodel import Session, select, update
@@ -5,7 +7,7 @@ from starlette.requests import Request
 from datetime import datetime, timezone
 
 from src.models.db_models import Student
-from src.models.request_response_models import BaseRequestResponse, StudentUpdateResponseParams
+from src.models.request_response_models import BaseRequestResponse, StudentListRequest, StudentListResponse, StudentUpdateResponseParams
 from src.utils.student_utils import check_existing_student, populate_empty_fields
 
 
@@ -165,5 +167,24 @@ class StudentService:
             session.commit()
             session.refresh(student)
         return student
+
+    @staticmethod
+    def get_paginated_student_list(session: Session, filter: Optional[str], value: Optional[str | int], page: int, limit: int) -> StudentListResponse:
+        if not (filter and value):
+            filter = ""
+            value = ""
+        if filter in ["roll", "id"]:
+            value = int(value)
+        base_query = select(Student).where(Student.status == 'A')
+        if value != '' and filter != '':
+            base_query = base_query.where(getattr(Student, filter) == value)
+        count_query = select(func.count()).select_from(base_query.subquery())
+        total_count = session.exec(count_query).one()
+        page_count = ceil(total_count / limit) if ceil(total_count / limit) > 0 else 1
+
+        offset = (page - 1)*limit
+        student_list_query = base_query.offset(offset).limit(limit)
+        students = session.exec(student_list_query).all()
+        return StudentListResponse(page_count = page_count, students = students)
 
 student_service = StudentService()

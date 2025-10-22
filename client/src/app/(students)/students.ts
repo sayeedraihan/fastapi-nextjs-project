@@ -1,6 +1,7 @@
 "use client"
 
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { BaseRequestResponse } from "../dashboard/dashboard";
 
 export interface AuditModel {
     created_at?: string;
@@ -28,6 +29,16 @@ export const enum LEVEL {
 export const enum MEDIUM {
     BANGLA =    "bangla",
     ENGLISH =   "english"
+}
+
+type GenericPaginationRequestModel = {
+    page?: number;
+    limit?: number;
+}
+
+type GenericFilterRequestModel = {
+    filter?: string;
+    value?: string;
 }
 
 type StudentBase = {
@@ -75,6 +86,26 @@ type AddUserRequest = {
     role: string;
     full_name?: string;
 };
+
+type StudentListRequest = GenericPaginationRequestModel & GenericFilterRequestModel
+
+type StudentListResponse = {
+    page_count?: number;
+    students?: Student[];
+}
+
+type FilterProps = {
+    onFilterChange: (payload : FilterPayload) => void;
+    currentFilters: FilterPayload
+}
+
+type FilterPayload = {
+    property?: string;
+    value?: string;
+    activeFilter: boolean;
+}
+
+type EnumOption = { [key: string]: string };
 
 const convertResponseToStudentList = (objects: Student[]) => {
 
@@ -174,4 +205,4 @@ const handleTableRowClickEvent = (studentId: number, setSelectedStudent: (studen
 
 export { convertResponseToStudentList, convertResponseToStudent, fetchStudentById, handleTableRowClickEvent }
 
-export type { StudentBase, Student, Performance, StudentUpdateResponseParams, AddUserRequest, User, UserBase }
+export type { StudentBase, Student, Performance, StudentUpdateResponseParams, AddUserRequest, User, UserBase, StudentListRequest, StudentListResponse, FilterPayload, FilterProps, EnumOption }

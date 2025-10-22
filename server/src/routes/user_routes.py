@@ -5,6 +5,7 @@ from sqlmodel import Session
 from starlette import status
 from starlette.requests import Request
 
+from src.utils.authentication_utils import get_password_hash
 from src.service.student_service import student_service
 from src.models.request_response_models import AddUserRequest, GetUserByIdRequest
 from src.utils.user_utils import role_checker
@@ -25,7 +26,7 @@ def add_admin_user(*, session: Session = Depends(get_session), request: Request)
         username="admin",
         email="admin@example.com",
         full_name="System Administrator",
-        password="$2a$12$SW5CVGYA8fjUJKPKqEQtHOZLsDXDgAGI1Prb/EoAVKyNt4pxL8trW",
+        password='admin',
         role="A"
     )
     user = user_service.add_user(session, user, "SYS")

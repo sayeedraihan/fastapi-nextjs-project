@@ -2,77 +2,56 @@
 
 import { useEffect, useState } from "react";
 
-import { useStudent } from "@/app/contexts/student-context";
 import { catchError } from "@/app/routes/route_utils";
+import { useForm } from "react-hook-form";
+import { EnumOption, FilterProps } from "../../students";
 
-export type StudentFilterParams = {
-    prop: string;
-    val: string;
-}
-
-type EnumOption = { [key: string]: string };
-
-const Filter = () => {
-    const [ selectedProperty, setSelectedProperty ] = useState<string>("id");
-    const [ selectedValue, setSelectedValue ] = useState<string>("");
+const Filter = (
+    { onFilterChange, currentFilters }: FilterProps
+) => {
+    const [ selectedProperty, setSelectedProperty ] = useState<string | undefined>(currentFilters.property);
+    const [ selectedValue, setSelectedValue ] = useState<string | undefined>(currentFilters.value);
+    const [ activeFilter, setActiveFilter ] = useState<boolean>(currentFilters.activeFilter);
     const [ fieldType, setFieldType ] = useState<string>("input");
     const [ inputType, setInputType ] = useState<string>("number");
     const [ options, setOptions ] = useState<{ [key: string]: string; }[]>([]);
     const [ isFilterButtonDisabled, setFilterButtonDisabled ] = useState<boolean>(true);
 
-    const { originalStudentList, setResultantStudentList } = useStudent();
+    const { handleSubmit, formState: {} } = useForm();
     const [ fields, setFields ] = useState<EnumOption[]>([]);
     const [ levels, setLevels ] = useState<EnumOption[]>([]);
     const [ mediums, setMediums ] = useState<EnumOption[]>([]);
 
-    const onClearFilterClicked = () => {
+    const onClearFilterClicked = async() => {
         setSelectedValue("");
+        setActiveFilter(false);
         setSelectedProperty("id");
-        setResultantStudentList(originalStudentList);
         setFilterButtonDisabled(true);
+        onFilterChange({ property: undefined, value: undefined, activeFilter: false });
     }
 
-    const onFilterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const onFilterSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const filteredList = originalStudentList.filter(student => {
-            if (selectedProperty === "all") {
-                const selectedValueString = selectedValue.toLowerCase();
-                return (
-                    student.name && student.name.toLowerCase().includes(selectedValueString) ||
-                    student.section && student.section.toLowerCase().includes(selectedValueString) ||
-                    student.medium && student.medium.toLowerCase().includes(selectedValueString)
-                );
-            } else {
-                const studentValue = student[selectedProperty as keyof typeof student];
-                if (studentValue !== undefined && studentValue !== null) {
-                    const studentValueString = studentValue.toString().toLowerCase();
-                    const selectedValueString = selectedValue.toLowerCase();
-                    return studentValueString === selectedValueString;
-                }
-            }
-            return false;
-        });
-        setResultantStudentList(filteredList);
+        onFilterChange({ property: selectedProperty, value: selectedValue, activeFilter: true });
     }
 
     useEffect(() => {
-        if(selectedValue === "") {
-            setFilterButtonDisabled(true);
-        } else {
-            setFilterButtonDisabled(false);
-        }
+        setFilterButtonDisabled(selectedValue === "");
     }, [selectedValue]);
 
     useEffect(() => {
-        setSelectedValue("");
-        if(["id", "name", "section", "all"].includes(selectedProperty)) {
+        setSelectedValue(activeFilter ? currentFilters.value : "");
+    }, [selectedProperty])
+
+    useEffect(() => {
+        if(selectedProperty && ["id", "name", "section", "roll"].includes(selectedProperty)) {
             setFieldType("input");
-            if(["name", "section", "all"].includes(selectedProperty)) {
+            if(["name", "section"].includes(selectedProperty)) {
                 setInputType("text");
             } else {
                 setInputType("number");
             }
-        } else if(["level", "medium"].includes(selectedProperty)) {
+        } else if(selectedProperty && ["level", "medium"].includes(selectedProperty)) {
             setFieldType("select");
             if("level" === selectedProperty) {
                 setOptions(levels);
@@ -85,19 +64,19 @@ const Filter = () => {
     useEffect(() => {
         const fetchEnums = async () => {
             try {
-            const response = await fetch("/routes/get-utils", {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            });
+                const response = await fetch("/routes/get-utils", {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch filter data');
-            }
+                if (!response.ok) {
+                    throw new Error('Failed to fetch filter data');
+                }
 
-            let allEnums = await response.json();
-            setFields(allEnums[0]);
-            setLevels(allEnums[1]);
-            setMediums(allEnums[2]);
+                let allEnums = await response.json();
+                setFields(allEnums[0]);
+                setLevels(allEnums[1]);
+                setMediums(allEnums[2]);
 
             } catch (error: unknown) {
                 catchError(error, "Error fetching enums: ", "Unknown error fetching enums");
@@ -107,7 +86,7 @@ const Filter = () => {
     }, []);
 
     return (
-        <form className="p-2" onSubmit={(e) => onFilterSubmit(e)}>
+        <form className="p-2" onSubmit={onFilterSubmit}>
             <div className="flex flex-col items-center">
                 <div>
                     <label htmlFor="field">Field: </label>
@@ -125,7 +104,6 @@ const Filter = () => {
                         "
                     >
                         <option value="" disabled>--Please choose an option--</option>
-                        <option value="all">All</option>
                         {fields.map((field, index) => {
                             const [key, value] = Object.entries(field)[0];
                             return (
@@ -175,7 +153,7 @@ const Filter = () => {
                                 bg-surface 
                             "
                         >
-                            <option value="" disabled>--Please choose an option--</option>
+                            <option value="">--Please choose an option--</option>
                             {options.map((option, index) => {
                                 const [key, value] = Object.entries(option)[0];
                                 return (
