@@ -40,7 +40,7 @@ const middleware = (request: NextRequest) => {
 * - authenticate (the authentication API route)
 */
 export const config = {
-    matcher: [ '/((?!_next/static|_next/image|favicon.ico|routes/get-token).*)' ],
+    matcher: [ '/((?!_next/static|_next/image|favicon.ico|routes/).*)' ],
 };
 
 export { middleware }
