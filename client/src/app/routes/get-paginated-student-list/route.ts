@@ -1,22 +1,26 @@
-import { Student, StudentListRequest, StudentListResponse } from "@/app/(students)/students";
+import { Student, StudentListResponse } from "@/app/(students)/students";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { catchError } from "../route_utils";
 
-const POST = async(
+const GET = async(
     request: NextRequest
 ) => {
     try {
-        const studentListRequest: StudentListRequest = await request.json();
         const sessionTokenCookie = (await cookies()).get("session_token");
         const token = sessionTokenCookie?.value;
-        const apiResponse = await fetch(`http://127.0.0.1:8000/get-all-students`, {
-            method: "POST",
+
+        const { searchParams } = new URL(request.url);
+
+        const fastAPIUrl = new URL("http://127.0.0.1:8000/get-all-students");
+        fastAPIUrl.search = searchParams.toString();
+
+        const apiResponse = await fetch(fastAPIUrl.href, {
+            method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`,
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(studentListRequest)
+            }
         });
         if(!apiResponse.ok) {
             const errorData = await apiResponse.json();
@@ -36,4 +40,4 @@ const POST = async(
     }
 }
 
-export { POST }
+export { GET }

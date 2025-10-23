@@ -7,21 +7,21 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from src.routes import authentication_routes, course_routes, dashboard_routes, db_routes, performance_routes, student_routes, user_routes, util_routes
 from src.templating import template_Init
-from src.db_init import initialize_database # gemini
-from contextlib import asynccontextmanager # gemini
+from src.db_init import initialize_database
+from contextlib import asynccontextmanager
 
 
-@asynccontextmanager # gemini
-async def lifespan(app: FastAPI): # gemini
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     # run on startup
-    initialize_database() # gemini
-    yield # gemini
+    initialize_database()
+    yield
     # run on shutdown
 
 
 SESSION_SECRET_KEY = os.urandom(24).hex()  # secret key for session
 
-app = FastAPI(lifespan=lifespan) # gemini
+app = FastAPI(lifespan=lifespan)
 
 # --- CORS Middleware setting start ---
 # Define the origins that are allowed to access your backend
@@ -50,15 +50,6 @@ app.include_router(dashboard_routes.router)
 app.include_router(course_routes.router)
 app.include_router(util_routes.router)
 app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET_KEY)
-
-# === ADD THIS SECTION ===
-# By calling this after all routes are included, we guarantee that every model
-# has been imported and is known to Python before we ask SQLAlchemy to resolve
-# the relationships between them.
-# models.Student.model_rebuild()
-# models.Course.model_rebuild()
-# models.Performance.model_rebuild()
-# === END SECTION ===
 
 @app.get("/")
 def home() -> dict:

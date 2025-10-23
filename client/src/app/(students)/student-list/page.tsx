@@ -1,60 +1,97 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Student, useStudent } from "../../contexts/student-context"
+import { useCallback, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 
 import Table from "./table/table"
-import { FilterPayload, StudentListRequest, StudentListResponse } from "../students"
+import { FilterPayload, StudentListResponse } from "../students"
 import Filter from "./filter/page"
 import { catchError } from "@/app/routes/route_utils"
 import { useAuth } from "@/app/contexts/auth-context"
+import { useStudent } from "../../contexts/student-context"
 
 const StudentList = () => {
     const [ loading, setLoading ] = useState(true);
     const [ error, setError ] = useState<string | null>(null);
-    const [ limit, setLimit ] = useState<number>(10);
-    const [ page, setPage ] = useState<number>(1);
+    const [ warning, setWarning ] = useState<string | null>(null);
     const [ totalPage, setTotalPage ] = useState<number>(1);
-    const [ currentFilters, setCurrentFilters ] = useState<FilterPayload>({ property: "id", value: "", activeFilter: false });
     const { resultantStudentList, setResultantStudentList } = useStudent();
     const { role, loading: authLoading } = useAuth();
 
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const property = searchParams.get("property") || "id";
+    const value = searchParams.get("value") || "";
+    const currentFilters: FilterPayload = {
+        property: property,
+        value: value,
+        activeFilter: !!(searchParams.get("property") && searchParams.get("value"))
+    };
+
+    const updateQueryParams = useCallback((newParams: Record<string, string | number>) => {
+        const params = new URLSearchParams(searchParams);
+        Object.entries(newParams).forEach(([key, value]) => {
+            const val = String(value);
+            if (val) {
+                params.set(key, val);
+            } else {
+                params.delete(key);
+            }
+        });
+        router.push(`${pathname}?${params.toString()}`);
+    }, [searchParams, router, pathname]);
+
     const handleFilterChange = (payload: FilterPayload) => {
-        setPage(1);
-        setCurrentFilters(payload);
+        updateQueryParams({
+            page: 1,
+            property: payload.property || "",
+            value: payload.value || ""
+        });
     }
 
     const handleLimitChange = (newLimit: number) => {
-        setLimit(newLimit);
-        setPage(1);
+        updateQueryParams({
+            page: 1,
+            limit: newLimit
+        });
     };
 
-    const goToPreviousPage = () => setPage(p => Math.max(1, p - 1));
-    const goToNextPage = () => setPage(p => Math.min(totalPage, p + 1));
+    const goToPreviousPage = () => updateQueryParams({ page: page - 1 });
+    const goToNextPage = () => updateQueryParams({ page: page + 1 });
 
     useEffect(() => {
         const fetchStudents = async () => {
             setLoading(true);
             setError(null);
-            const request: StudentListRequest = {
-                page: page,
-                limit: limit,
-                filter: currentFilters.property || undefined,
-                value: currentFilters.value || undefined
-            }
+
+            const params = new URLSearchParams(searchParams);
+            if (!params.has("page")) params.set("page", "1");
+            if (!params.has("limit")) params.set("limit", "10");
+
+            const currentPage = parseInt(params.get("page") || "1");
+
             try {
-                const response: Response = await fetch("/routes/get-paginated-student-list", {
-                    method: 'POST',
+                const response: Response = await fetch(`/routes/get-paginated-student-list?${params.toString()}`, {
+                    method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(request)
                 });
 
                 if(!response.ok) {
                     throw new Error("Failed to fetch students. Please ensure that the backend is running.");
                 } else {
-                    const objects: StudentListResponse = await response.json();
-                    setResultantStudentList(objects.students ?? []);
-                    setTotalPage(objects.page_count ?? 1);
+                    const studentListResponse: StudentListResponse = await response.json();
+                    setWarning(studentListResponse.message ?? null);
+                    if(studentListResponse.message && studentListResponse.message.length > 0) {
+                        setResultantStudentList([]);
+                    } else {
+                        setResultantStudentList(studentListResponse.students ?? []);
+                    }
+                    setTotalPage(studentListResponse.page_count ?? 1);
                 }
             } catch (error: unknown) {
                 catchError(error, "error.message: ", "Unknown error caught at /student-list/page.tsx catch statement.");
@@ -64,7 +101,7 @@ const StudentList = () => {
         }
 
         fetchStudents();
-    }, [page, limit, currentFilters, setResultantStudentList]);
+    }, [searchParams, setResultantStudentList]);
 
     if (authLoading) {
          return <p className="p-4 text-center">Authenticating...</p>;
@@ -87,7 +124,6 @@ const StudentList = () => {
         );
     }
 
-    // FIX: Add this block to show only the error if it exists
     if (error) {
         return (
             <main className="flex flex-col items-center p-4">
@@ -100,6 +136,14 @@ const StudentList = () => {
     return (
         <div className="mx-2 py-2 flex flex-col">
             <Filter currentFilters={ currentFilters } onFilterChange={handleFilterChange} />
+
+            {warning && (
+                <p className="text-center text-destructive mt-4">{warning}</p>
+            )}
+
+            {!warning && resultantStudentList.length === 0 && (
+                <p className="text-center text-textsecondary mt-4">No students found matching the criteria.</p>
+            )}
             {resultantStudentList.length > 0 ? (
                 <Table columnHeaders={columnHeaders} tableData={resultantStudentList}></Table>
             ) : (

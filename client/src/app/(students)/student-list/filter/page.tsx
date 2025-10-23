@@ -11,23 +11,23 @@ const Filter = (
 ) => {
     const [ selectedProperty, setSelectedProperty ] = useState<string | undefined>(currentFilters.property);
     const [ selectedValue, setSelectedValue ] = useState<string | undefined>(currentFilters.value);
-    const [ activeFilter, setActiveFilter ] = useState<boolean>(currentFilters.activeFilter);
     const [ fieldType, setFieldType ] = useState<string>("input");
     const [ inputType, setInputType ] = useState<string>("number");
     const [ options, setOptions ] = useState<{ [key: string]: string; }[]>([]);
     const [ isFilterButtonDisabled, setFilterButtonDisabled ] = useState<boolean>(true);
 
-    const { handleSubmit, formState: {} } = useForm();
+    const { formState: {} } = useForm();
     const [ fields, setFields ] = useState<EnumOption[]>([]);
     const [ levels, setLevels ] = useState<EnumOption[]>([]);
     const [ mediums, setMediums ] = useState<EnumOption[]>([]);
 
+    useEffect(() => {
+        setSelectedProperty(currentFilters.property || "id");
+        setSelectedValue(currentFilters.value || "");
+    }, [currentFilters]);
+
     const onClearFilterClicked = async() => {
-        setSelectedValue("");
-        setActiveFilter(false);
-        setSelectedProperty("id");
-        setFilterButtonDisabled(true);
-        onFilterChange({ property: undefined, value: undefined, activeFilter: false });
+        onFilterChange({ property: "id", value: "", activeFilter: false });
     }
 
     const onFilterSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
@@ -40,7 +40,6 @@ const Filter = (
     }, [selectedValue]);
 
     useEffect(() => {
-        setSelectedValue(activeFilter ? currentFilters.value : "");
     }, [selectedProperty])
 
     useEffect(() => {
