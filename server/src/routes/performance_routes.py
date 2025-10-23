@@ -31,7 +31,6 @@ def add_new_performance(*, session: Session = Depends(get_session),
                     current_user: Annotated[User, Depends(get_current_active_user)]):
     return performance_service.add_performance(session, performance, current_user.username)
 
-# --- FIX: ADDING THE MISSING PUT ROUTE ---
 @router.put("/update-performance", response_model=Performance)
 def update_performance_route(*, session: Session = Depends(get_session),
                          performance: Performance,

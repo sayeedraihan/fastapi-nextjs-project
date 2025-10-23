@@ -31,16 +31,6 @@ export const enum MEDIUM {
     ENGLISH =   "english"
 }
 
-type GenericPaginationRequestModel = {
-    page?: number;
-    limit?: number;
-}
-
-type GenericFilterRequestModel = {
-    filter?: string;
-    value?: string;
-}
-
 type StudentBase = {
     name?: string;
     roll?: number;
@@ -87,9 +77,7 @@ type AddUserRequest = {
     full_name?: string;
 };
 
-type StudentListRequest = GenericPaginationRequestModel & GenericFilterRequestModel
-
-type StudentListResponse = {
+type StudentListResponse = BaseRequestResponse & {
     page_count?: number;
     students?: Student[];
 }
@@ -205,4 +193,4 @@ const handleTableRowClickEvent = (studentId: number, setSelectedStudent: (studen
 
 export { convertResponseToStudentList, convertResponseToStudent, fetchStudentById, handleTableRowClickEvent }
 
-export type { StudentBase, Student, Performance, StudentUpdateResponseParams, AddUserRequest, User, UserBase, StudentListRequest, StudentListResponse, FilterPayload, FilterProps, EnumOption }
+export type { StudentBase, Student, Performance, StudentUpdateResponseParams, AddUserRequest, User, UserBase, StudentListResponse, FilterPayload, FilterProps, EnumOption }

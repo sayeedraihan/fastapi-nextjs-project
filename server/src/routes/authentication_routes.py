@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Annotated, Dict
+from typing import Annotated
 
 from fastapi import Depends, APIRouter, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
@@ -13,16 +13,15 @@ from src.db_init import get_session
 from src.models.token import Token
 from src.routes.base_routes import get_router
 from src.utils.authentication_utils import ACCESS_TOKEN_EXPIRE_MINUTES
-from src.utils.base_utils import Level, Medium, Field
 from src.utils.user_utils import get_current_active_user, \
     authenticate_user, create_access_token
 
 router: APIRouter = get_router()
 
 @router.post("/get-token")
-def get_token(*, session: Session = Depends(get_session), #loading_fix
-                    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], #loading_fix
-                    request: Request) -> LoginResponse: #loading_fix
+def get_token(*, session: Session = Depends(get_session),
+                    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+                    request: Request) -> LoginResponse:
     user: User = authenticate_user(session, form_data)
     if not user:
         raise HTTPException(
@@ -46,5 +45,5 @@ def get_token(*, session: Session = Depends(get_session), #loading_fix
 
 @router.get("/users/me", response_model=User)
 async def read_users_me(current_user: Annotated[User, Depends(get_current_active_user)]):
-    return current_user.role
+    return current_user
 

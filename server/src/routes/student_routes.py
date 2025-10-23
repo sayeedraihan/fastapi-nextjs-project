@@ -11,12 +11,12 @@ from src.models.student import StudentBase
 from src.db_init import get_session
 from src.service.student_service import student_service
 from src.models.db_models import Student
-from src.models.request_response_models import BaseRequestResponse, StudentListRequest, StudentListResponse, StudentUpdateResponseParams, StudentDeleteParams
+from src.models.request_response_models import BaseRequestResponse, StudentListResponse, StudentUpdateResponseParams, StudentDeleteParams
 from src.models.db_models import User
 from src.routes.base_routes import get_router
-from src.utils.user_utils import get_current_active_user, role_checker
+from src.utils.user_utils import role_checker
 
-router: APIRouter = get_router() # setup our APIRouter
+router: APIRouter = get_router()
 admin_dependency = Depends(role_checker([Role.ADMIN]))
 
 @router.put("/add-demo-student")
@@ -33,14 +33,18 @@ def add_new_student(*, session: Session = Depends(get_session),
     student = student_service.add_student(session, student, current_user.username)
     return student
 
-@router.post("/get-all-students")
+@router.get("/get-all-students")
 def get_all_students(*, session: Session = Depends(get_session), 
                     current_user: Annotated[User, admin_dependency],
-                    student_list_request: StudentListRequest):
+                    property: Optional[str] = "",
+                    value: Optional[str | int] = "",
+                    page: int = 1,
+                    limit: int = 10):
     student_list_response: StudentListResponse = student_service.get_paginated_student_list(
-        session, student_list_request.filter, student_list_request.value, student_list_request.page, student_list_request.limit
+        session, property, value, page, limit
     )
-    if not student_list_response.students:
+
+    if not student_list_response.students and not student_list_response.message:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "No students found")
     return student_list_response
 

@@ -58,17 +58,6 @@ class AddUserRequest(BaseModel):
 class GetUserByIdRequest(BaseModel):
     user_id: int
 
-class GenericPaginationRequestModel(BaseModel):
-    page: Optional[int] = None
-    limit: Optional[int] = None
-
-class GenericFilterRequestModel(BaseModel):
-    filter: Optional[str] = None
-    value: Optional[str | int] = None
-
-class StudentListRequest(GenericPaginationRequestModel, GenericFilterRequestModel):
-    pass
-
 class StudentListResponse(BaseRequestResponse):
     page_count: Optional[int]
     students: Optional[list[Student]]

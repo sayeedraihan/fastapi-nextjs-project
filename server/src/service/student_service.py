@@ -7,9 +7,8 @@ from starlette.requests import Request
 from datetime import datetime, timezone
 
 from src.models.db_models import Student
-from src.models.request_response_models import BaseRequestResponse, StudentListRequest, StudentListResponse, StudentUpdateResponseParams
+from src.models.request_response_models import BaseRequestResponse, StudentListResponse, StudentUpdateResponseParams
 from src.utils.student_utils import check_existing_student, populate_empty_fields
-
 
 class StudentService:
     def delete_student_by_id(self, session: Session, prop: str, value: str | int, deleted_by: str):
@@ -143,10 +142,10 @@ class StudentService:
         return existing_students[0] if len(existing_students) and existing_students[0].id != student_data.id else None
     
     @staticmethod
-    def select_students_by_class(session: Session) -> dict[str, int]: # gemini
-        statement = select(Student.level, func.count(Student.id)).group_by(Student.level) # gemini
-        results = session.exec(statement).all() # gemini
-        return {level: count for level, count in results} # gemini
+    def select_students_by_class(session: Session) -> dict[str, int]:
+        statement = select(Student.level, func.count(Student.id)).group_by(Student.level)
+        results = session.exec(statement).all()
+        return {level: count for level, count in results}
     
     @staticmethod
     def select_students_by_class_v2(session: Session) -> {str, int}:
@@ -181,6 +180,13 @@ class StudentService:
         count_query = select(func.count()).select_from(base_query.subquery())
         total_count = session.exec(count_query).one()
         page_count = ceil(total_count / limit) if ceil(total_count / limit) > 0 else 1
+
+        if page > page_count and total_count > 0:
+            return StudentListResponse(
+                page_count = page_count,
+                students = [],
+                message = f"Page {page} is out of range. The maximum page is {page_count}."
+            )
 
         offset = (page - 1)*limit
         student_list_query = base_query.offset(offset).limit(limit)

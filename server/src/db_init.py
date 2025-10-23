@@ -1,5 +1,3 @@
-# gemini: Refactored database initialization to happen on app startup.
-
 from sqlalchemy import create_engine, inspect
 from sqlmodel import SQLModel, Session, select
 import threading
