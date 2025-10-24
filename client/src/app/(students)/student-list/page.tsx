@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { Suspense, useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { usePathname, useSearchParams } from "next/navigation"
 
@@ -11,7 +11,10 @@ import { catchError } from "@/app/routes/route_utils"
 import { useAuth } from "@/app/contexts/auth-context"
 import { useStudent } from "../../contexts/student-context"
 
-const StudentList = () => {
+/* 
+ * As we are using useSearchParams(), we need to make a child component for the whole logic.
+ */
+const StudentListClient = () => {
     const [ loading, setLoading ] = useState(true);
     const [ error, setError ] = useState<string | null>(null);
     const [ warning, setWarning ] = useState<string | null>(null);
@@ -72,8 +75,6 @@ const StudentList = () => {
             const params = new URLSearchParams(searchParams);
             if (!params.has("page")) params.set("page", "1");
             if (!params.has("limit")) params.set("limit", "10");
-
-            const currentPage = parseInt(params.get("page") || "1");
 
             try {
                 const response: Response = await fetch(`/routes/get-paginated-student-list?${params.toString()}`, {
@@ -186,6 +187,14 @@ const StudentList = () => {
                 </div>
             </div>
         </div>
+    )
+}
+
+const StudentList = () => {
+    return (
+        <Suspense>
+            <StudentListClient />
+        </Suspense>
     )
 }
 

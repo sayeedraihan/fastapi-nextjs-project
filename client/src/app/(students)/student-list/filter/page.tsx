@@ -9,8 +9,8 @@ import { EnumOption, FilterProps } from "../../students";
 const Filter = (
     { onFilterChange, currentFilters }: FilterProps
 ) => {
-    const [ selectedProperty, setSelectedProperty ] = useState<string | undefined>(currentFilters.property);
-    const [ selectedValue, setSelectedValue ] = useState<string | undefined>(currentFilters.value);
+    const [ selectedProperty, setSelectedProperty ] = useState<string | undefined>(currentFilters? currentFilters.property : undefined);
+    const [ selectedValue, setSelectedValue ] = useState<string | undefined>(currentFilters? currentFilters.value : undefined);
     const [ fieldType, setFieldType ] = useState<string>("input");
     const [ inputType, setInputType ] = useState<string>("number");
     const [ options, setOptions ] = useState<{ [key: string]: string; }[]>([]);
@@ -72,7 +72,7 @@ const Filter = (
                     throw new Error('Failed to fetch filter data');
                 }
 
-                let allEnums = await response.json();
+                const allEnums = await response.json();
                 setFields(allEnums[0]);
                 setLevels(allEnums[1]);
                 setMediums(allEnums[2]);

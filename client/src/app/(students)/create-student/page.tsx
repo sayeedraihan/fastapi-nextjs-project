@@ -142,7 +142,7 @@ const CreateStudent = () => {
                 throw new Error('Failed to fetch filter data');
             }
 
-            let allEnums = await response.json();
+            const allEnums = await response.json();
             setLevels(allEnums[1]);
             setMediums(allEnums[2]);
 
