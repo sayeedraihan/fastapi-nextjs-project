@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useModal } from '../../hooks/modal/useModal';
 import Modal from '../../custom-components/modal/modal';
@@ -44,7 +44,7 @@ const CourseForm = () => {
         setInitialState({ name: '', courseCode: '', description: '', credits: 0 });
     };
 
-    const hasChanges = () => {
+    const hasChanges = useCallback(() => {
         if (isEditMode) {
             return (
                 name !== initialState.name ||
@@ -55,7 +55,7 @@ const CourseForm = () => {
         }
         // In create mode, any input is a change from the initial empty state.
         return name !== '' || courseCode !== '' || description !== '' || credits !== 0;
-    };
+    }, [courseCode, credits, description, initialState, isEditMode, name]);
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -140,7 +140,7 @@ const CourseForm = () => {
     
     useEffect(() => {
         setIsSaveDisabled(!hasChanges());
-    }, [name, courseCode, description, credits, initialState]);
+    }, [courseCode, credits, description, hasChanges, initialState, name]);
 
     if (authLoading) {
         return <p>Loading...</p>;

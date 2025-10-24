@@ -11,13 +11,12 @@ from src.models.request_response_models import BaseRequestResponse, StudentListR
 from src.utils.student_utils import check_existing_student, populate_empty_fields
 
 class StudentService:
-    def delete_student_by_id(self, session: Session, prop: str, value: str | int, deleted_by: str):
+    def delete_student_by_id(self, session: Session, prop: str, value: str | int, updated_by: str):
         update_student_statement = (
             update(Student)
             .where(getattr(Student, prop) == value)
             .values(
-                deleted_at = datetime.now(timezone.utc),
-                deleted_by = deleted_by,
+                updated_by = updated_by,
                 status = "I"
             )
         )
@@ -25,14 +24,13 @@ class StudentService:
         if result.rowcount == 0:
             return None
         session.commit()
-        return BaseRequestResponse(message=f"Successfully deleted student(s) where {prop} = {value}")
+        return BaseRequestResponse(message=f"Successfully updated student(s) where {prop} = {value}")
 
     @staticmethod
     def add_demo_students(session: Session) -> list[Student]:
-        now = datetime.now(timezone.utc)
-        student_01 = Student(name='Sayeed', roll=12, level='Ten', section='A1', created_at=now, created_by="SYS", updated_at=now, updated_by="SYS")
-        student_02 = Student(name='Raihan', roll=15, level='Nine', section='A2', created_at=now, created_by="SYS", updated_at=now, updated_by="SYS")
-        student_03 = Student(name='Sayem', roll=8, level='Six', section='B2', created_at=now, created_by="SYS", updated_at=now, updated_by="SYS")
+        student_01 = Student(name='Sayeed', roll=12, level='Ten', section='A1', created_at=None, created_by="SYS", updated_at=None, updated_by="SYS")
+        student_02 = Student(name='Raihan', roll=15, level='Nine', section='A2', created_at=None, created_by="SYS", updated_at=None, updated_by="SYS")
+        student_03 = Student(name='Sayem', roll=8, level='Six', section='B2', created_at=None, created_by="SYS", updated_at=None, updated_by="SYS")
 
         session.add(student_01)
         session.add(student_02)
@@ -47,9 +45,7 @@ class StudentService:
 
     @staticmethod
     def add_student(session: Session, student: Student, creator_username: str):
-        student.created_at = datetime.now(timezone.utc)
         student.created_by = creator_username
-        student.updated_at = datetime.now(timezone.utc)
         student.updated_by = creator_username
         session.add(student)
         student.id = None
@@ -116,7 +112,6 @@ class StudentService:
                     continue
                 else:
                     setattr(student, key, value)
-            student.updated_at = datetime.now(timezone.utc)
             student.updated_by = updater_username
             session.add(student)
             session.commit()
@@ -160,7 +155,6 @@ class StudentService:
         student = session.exec(statement).first()
         if student:
             student.user_id = user_id
-            student.updated_at = datetime.now(timezone.utc)
             student.updated_by = updater_username
             session.add(student)
             session.commit()

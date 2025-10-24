@@ -5,14 +5,13 @@ from src.models.db_models import Performance
 
 
 class PerformanceService:
-    def delete_performance(self, session: Session, student_id: int, course_id: int, deleted_by: str) -> bool:
+    def delete_performance(self, session: Session, student_id: int, course_id: int, updated_by: str) -> bool:
         statement = (
             update(Performance)
             .where(Performance.student_id == student_id)
             .where(Performance.course_id == course_id)
             .values(
-                deleted_by=deleted_by,
-                deleted_at=datetime.now(timezone.utc),
+                updated_by=updated_by,
                 status="I"
             )
         )
@@ -22,9 +21,7 @@ class PerformanceService:
 
     @staticmethod
     def add_performance(session: Session, performance: Performance, creator_username: str) -> Performance:
-        performance.created_at = datetime.now(timezone.utc)
         performance.created_by = creator_username
-        performance.updated_at = datetime.now(timezone.utc)
         performance.updated_by = creator_username
         session.add(performance)
         session.commit()
@@ -47,7 +44,6 @@ class PerformanceService:
         result.practical = performance.practical
         result.in_course = performance.in_course
 
-        result.updated_at = datetime.now(timezone.utc)
         result.updated_by = updater_username
 
         session.add(result)

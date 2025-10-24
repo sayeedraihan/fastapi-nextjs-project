@@ -35,9 +35,7 @@ class CourseService:
 
     @staticmethod
     def add_course(session: Session, course: Course, creator_username: str) -> Course:
-        course.created_at = datetime.now(timezone.utc)
         course.created_by = creator_username
-        course.updated_at = datetime.now(timezone.utc)
         course.updated_by = creator_username
         session.add(course)
         session.commit()
@@ -51,7 +49,6 @@ class CourseService:
         course.course_code = course_data.course_code
         course.description = course_data.description
         course.credits = course_data.credits
-        course.updated_at = datetime.now(timezone.utc)
         course.updated_by = updater_username
         session.add(course)
         session.commit()
@@ -59,23 +56,22 @@ class CourseService:
         return course
 
     @staticmethod
-    def delete_course(session: Session, course_id: int, deleted_by: str) -> bool:
+    def delete_course(session: Session, course_id: int, updated_by: str) -> bool:
         now_utc = datetime.now(timezone.utc)
         # Also delete related performance records
         performance_update_statement = (
             update(Performance)
             .where(Performance.course_id == course_id)
             .values(
-                deleted_at=now_utc,
-                deleted_by=deleted_by,
+                updated_at=now_utc,
+                updated_by=updated_by,
                 status="I"
             )
         )
         session.exec(performance_update_statement)
 
         course = CourseService.select_course_by_id(session, course_id)
-        course.deleted_at = datetime.now(timezone.utc)
-        course.deleted_by = deleted_by
+        course.updated_by = updated_by
         course.status = "I"
         session.add(course)
         session.commit()

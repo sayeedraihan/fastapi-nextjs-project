@@ -42,7 +42,6 @@ const StudentDetails = ({
     const studentLevelSelectRef = useRef<HTMLSelectElement>(null);
     const studentSectionInputRef = useRef<HTMLInputElement>(null);
     const studentMediumSelectRef = useRef<HTMLSelectElement>(null);
-    const usernameInputRef = useRef<HTMLInputElement>(null);
     const passwordInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
@@ -265,7 +264,7 @@ const StudentDetails = ({
                 throw new Error('Failed to fetch filter data');
             }
 
-            let allEnums = await response.json();
+            const allEnums = await response.json();
             setLevels(allEnums[1]);
             setMediums(allEnums[2]);
 

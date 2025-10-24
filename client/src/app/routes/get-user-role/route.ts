@@ -1,9 +1,9 @@
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { catchError } from "../../routes/route_utils";
 
-export const GET = async (request: NextRequest) => {
+export const GET = async () => {
     try {
         const sessionTokenCookie = (await cookies()).get("session_token");
         const token = sessionTokenCookie?.value;

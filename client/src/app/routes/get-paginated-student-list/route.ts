@@ -1,4 +1,4 @@
-import { Student, StudentListResponse } from "@/app/(students)/students";
+import { StudentListResponse } from "@/app/(students)/students";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { catchError } from "../route_utils";

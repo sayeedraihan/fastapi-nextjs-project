@@ -7,13 +7,11 @@ import { useModal } from "../../../../hooks/modal/useModal";
 import Modal from "../../../../custom-components/modal/modal";
 import { catchError } from "@/app/routes/route_utils";
 import { Course } from "@/app/(course)/course";
-import { useAuth } from "@/app/contexts/auth-context";
 
 // This component displays and manages the performance records for a selected student.
 const PerformancePage = () => {
     // State management for student, courses, performances, loading, and errors.
     const { isOpen, showModal, hideModal, message } = useModal();
-    const { role, loading: authLoading } = useAuth();
     const { selectedStudent } = useStudent();
     const [courses, setCourses] = useState<Course[]>([]);
     const [performances, setPerformances] = useState<Performance[]>([]);

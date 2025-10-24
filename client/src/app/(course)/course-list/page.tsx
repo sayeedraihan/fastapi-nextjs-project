@@ -19,26 +19,6 @@ const CourseList = () => {
     const router = useRouter();
     const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
 
-    const fetchCourses = async () => {
-        try {
-            setLoading(true);
-            const response = await fetch('/routes/get-all-courses', {
-            method: "GET",
-            headers: { "Content-Type" : "application/json" },
-        });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || "Failed to fetch courses");
-            }
-            const data = await response.json();
-            setCourses(data);
-        } catch (error: unknown) {
-            catchError(error, "Error fetching courses: ", "Unknown error while fetching courses");
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const handleEditClick = (course: Course) => {
         setSelectedCourse(course);
         router.push('/course-form');
@@ -74,6 +54,26 @@ const CourseList = () => {
     };
 
     useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch('/routes/get-all-courses', {
+                method: "GET",
+                headers: { "Content-Type" : "application/json" },
+            });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || "Failed to fetch courses");
+                }
+                const data = await response.json();
+                setCourses(data);
+            } catch (error: unknown) {
+                catchError(error, "Error fetching courses: ", "Unknown error while fetching courses");
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchCourses();
     }, [setCourses]);
 

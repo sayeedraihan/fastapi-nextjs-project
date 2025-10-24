@@ -1,12 +1,10 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useStudent } from "../contexts/student-context"
 import { useAuth } from "../contexts/auth-context"
 
 const Header = () => {
     const pathname = usePathname();
-    const { selectedStudent } = useStudent();
     const { role, loading } = useAuth();
     const linkRefs = [
         {
@@ -45,7 +43,6 @@ const Header = () => {
                     font-bold text-textprimary 
                 "
             >
-                {/* Loading links... */}
             </div>
         );
     }
@@ -68,7 +65,6 @@ const Header = () => {
                     pathname === linkRef.linkUrl || 
                     (pathname.startsWith(linkRef.linkUrl) && linkRef.linkUrl !== "./");
 
-                    // Define classes for better readability
                 const baseLinkClasses = "my-4 py-2 px-4 rounded-lg transition-colors duration-200 text-sm sm:text-base";
                 const activeLinkClasses = "bg-primary text-white font-semibold shadow-inner ";
                 const inactiveLinkClasses = "text-textprimary hover:bg-primary/10";
