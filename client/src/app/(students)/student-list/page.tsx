@@ -12,7 +12,8 @@ import { useAuth } from "@/app/contexts/auth-context"
 import { useStudent } from "../../contexts/student-context"
 
 /* 
- * As we are using useSearchParams(), we need to make a child component for the whole logic.
+ * As we are using useSearchParams(), we need to make this StudentListClient a child component for the whole logic.
+ * This is used as a child component below
  */
 const StudentListClient = () => {
     const [ loading, setLoading ] = useState(true);

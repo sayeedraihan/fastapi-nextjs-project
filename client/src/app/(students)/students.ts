@@ -42,6 +42,18 @@ type Student = {
     user_id?: number;
 } & StudentBase
 
+type StudentListDetail = {
+    id: number;
+    name?: string;
+    roll?: number;
+    level?: string;
+    section?: string;
+    medium?: string;
+    updated_at?: string;
+    updated_by?: string;
+    user_id?: number;
+}
+
 type Performance = {
     student_id: number;
     course_id: number;
@@ -77,7 +89,7 @@ type AddUserRequest = {
 
 type StudentListResponse = BaseRequestResponse & {
     page_count?: number;
-    students?: Student[];
+    students?: StudentListDetail[];
 }
 
 type FilterProps = {
@@ -95,9 +107,9 @@ type EnumOption = { [key: string]: string };
 
 const convertResponseToStudentList = (objects: Student[]) => {
 
-    const studentList: Student[] = [];
+    const studentList: StudentListDetail[] = [];
     objects.forEach((obj: Student) => {
-        const student: Student = {
+        const student: StudentListDetail = {
             id:         obj.id,
             name:       obj.name,
             roll:       obj.roll,
@@ -105,8 +117,6 @@ const convertResponseToStudentList = (objects: Student[]) => {
             section:    obj.section,
             medium:     obj.medium,
             user_id:    obj.user_id,
-            created_at: obj.created_at,
-            created_by: obj.created_by,
             updated_at: obj.updated_at,
             updated_by: obj.updated_by
         };
@@ -116,7 +126,7 @@ const convertResponseToStudentList = (objects: Student[]) => {
 }
 
 const convertResponseToStudent = (objects: Student[]) => {
-    let fetchedStudent: Student = { id: -1 }
+    let fetchedStudent: StudentListDetail = { id: -1 }
     objects.forEach((obj: Student) => {
         fetchedStudent = {
             id:         obj.id,
@@ -126,8 +136,6 @@ const convertResponseToStudent = (objects: Student[]) => {
             section:    obj.section,
             medium:     obj.medium,
             user_id:    obj.user_id,
-            created_at: obj.created_at,
-            created_by: obj.created_by,
             updated_at: obj.updated_at,
             updated_by: obj.updated_by
         };
@@ -136,7 +144,7 @@ const convertResponseToStudent = (objects: Student[]) => {
 }
 
 const fetchStudentById = async(studentId: string, 
-    setSelectedStudent?: (student: Student) => void, 
+    setSelectedStudent?: (student: StudentListDetail) => void, 
     setStudent?: (student: Student) => void, 
     setError?: (err: string) => void, 
     setLoading?: (loading: boolean) => void, 
@@ -182,7 +190,7 @@ const fetchStudentById = async(studentId: string,
     }
 }
 
-const handleTableRowClickEvent = (studentId: number, setSelectedStudent: (student: Student) => void, 
+const handleTableRowClickEvent = (studentId: number, setSelectedStudent: (student: StudentListDetail) => void, 
     router: AppRouterInstance) => {
 
     setSelectedStudent({id: studentId})
@@ -191,4 +199,4 @@ const handleTableRowClickEvent = (studentId: number, setSelectedStudent: (studen
 
 export { convertResponseToStudentList, convertResponseToStudent, fetchStudentById, handleTableRowClickEvent }
 
-export type { StudentBase, Student, Performance, StudentUpdateResponseParams, AddUserRequest, User, UserBase, StudentListResponse, FilterPayload, FilterProps, EnumOption }
+export type { StudentBase, Student, StudentListDetail, Performance, StudentUpdateResponseParams, AddUserRequest, User, UserBase, StudentListResponse, FilterPayload, FilterProps, EnumOption }

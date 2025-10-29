@@ -46,3 +46,14 @@ class User(UserBase, table=True):
 
     def __str__(self):
         return json.dumps(dict(self))
+
+class ClassLevel(AuditModel, table=True):
+    id: Optional[int] = Field(None, primary_key=True)
+    name: str = Field(unique=True, index=True)
+    value: str = Field(index=True)
+
+class Medium(AuditModel, table=True):
+    id: Optional[int] = Field(None, primary_key=True)
+    name: str = Field(unique=True, index=True)
+    value: str = Field(unique=True, index=True)
+

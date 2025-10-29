@@ -1,8 +1,9 @@
 import { Student } from "@/app/contexts/student-context";
 import TableRow from "../row/row";
+import { StudentListDetail } from "@/app/(students)/students";
 
 export type TableBodyProps = {
-    tableData: Student[];
+    tableData: StudentListDetail[];
     onRowDeleteClick: (id: string) => void;
 }
 

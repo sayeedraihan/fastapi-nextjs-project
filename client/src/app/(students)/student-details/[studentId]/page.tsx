@@ -123,7 +123,7 @@ const StudentDetails = ({
 
             if (!response.ok) {
                 const responseText = await response.json();
-                throw new Error("Failed to fetch performance data. Reason: " + responseText);
+                throw new Error("Failed to fetch performance data. Reason: " + responseText.detail);
             } else {
                 // Redirect to the performance page
                 router.push(`/student-details/${studentId}/performance`);
@@ -233,7 +233,7 @@ const StudentDetails = ({
 
                 if(!response.ok) {
                     const responseText = await response.json();
-                    throw new Error("Failed to update student. Reason: " + responseText);
+                    throw new Error("Failed to update student. Reason: " + responseText.detail);
                 } else {
                     const data: StudentUpdateResponseParams = await response.json();
                     setSelectedStudent(JSON.parse(data.updated_student));

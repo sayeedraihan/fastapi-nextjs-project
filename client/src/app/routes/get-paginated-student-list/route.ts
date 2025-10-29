@@ -10,6 +10,10 @@ const GET = async(
         const sessionTokenCookie = (await cookies()).get("session_token");
         const token = sessionTokenCookie?.value;
 
+        if (!token) {
+            console.error("API Route: Authorization token missing.");
+            return NextResponse.json({ detail: "Authorization token missing" }, { status: 401 });
+        }
         const { searchParams } = new URL(request.url);
 
         const fastAPIUrl = new URL("http://127.0.0.1:8000/get-all-students");

@@ -1,15 +1,15 @@
 "use client"
 
 import { createContext, ReactNode, useContext, useState } from "react";
-import { Student } from "../(students)/students";
+import { Student, StudentListDetail } from "../(students)/students";
 
 type StudentContextType = {
-    originalStudentList: Student[];
-    setOriginalStudentList: (students: Student[]) => void;
-    resultantStudentList: Student[];
-    setResultantStudentList: (students: Student[]) => void;
-    selectedStudent: Student;
-    setSelectedStudent: (student: Student) => void;
+    originalStudentList: StudentListDetail[];
+    setOriginalStudentList: (students: StudentListDetail[]) => void;
+    resultantStudentList: StudentListDetail[];
+    setResultantStudentList: (students: StudentListDetail[]) => void;
+    selectedStudent: StudentListDetail;
+    setSelectedStudent: (student: StudentListDetail) => void;
 }
 
 const StudentContext = createContext<StudentContextType>({ 
@@ -26,11 +26,9 @@ const StudentContextProvider = ({
 } : {
     children: ReactNode
 }) => {
-    const [ originalStudentList, setOriginalStudentList ] = useState<Student[]>([]);
-    const [ resultantStudentList, setResultantStudentList ] = useState<Student[]>([]);
-    const [ selectedStudent, setSelectedStudent ] = useState<Student>({
-        id: 0
-    });
+    const [ originalStudentList, setOriginalStudentList ] = useState<StudentListDetail[]>([]);
+    const [ resultantStudentList, setResultantStudentList ] = useState<StudentListDetail[]>([]);
+    const [ selectedStudent, setSelectedStudent ] = useState<StudentListDetail>({id: 0});
 
     return (
         <StudentContext.Provider value={{
