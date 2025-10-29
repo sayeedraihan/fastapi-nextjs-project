@@ -1,4 +1,5 @@
 
+from datetime import datetime
 from pydantic import BaseModel
 from sqlmodel import SQLModel
 from typing import Dict, List, Optional
@@ -61,4 +62,19 @@ class GetUserByIdRequest(BaseModel):
 class StudentListResponse(BaseRequestResponse):
     page_count: Optional[int]
     students: Optional[list[Student]]
+
+class StudentListDetail(BaseModel):
+    id: int
+    name: Optional[str] = None
+    roll: Optional[int] = None
+    level: Optional[str] = None
+    section: Optional[str] = None
+    medium: Optional[str] = None
+    updated_at: Optional[datetime] = None
+    updated_by: Optional[str] = None
+    user_id: Optional[int] = None
+
+class StudentListResponse(BaseRequestResponse):
+    page_count: Optional[int]
+    students: Optional[list[StudentListDetail]]
 

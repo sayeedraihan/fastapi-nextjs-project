@@ -43,7 +43,7 @@ const AdminDashboard = ({ data }: { data: AdminDashboardResponse }) => {
                     <table className="w-full text-sm text-left">
                         <thead className="text-xs uppercase bg-surface">
                             <tr>
-                                <th className="px-6 py-3 border-subtle border-2 w-48">Metric</th>
+                                <th className="px-6 py-3 border-subtle border-2 w-48">Class</th>
                                 {levelOrder.length > 0 ? (
                                     levelOrder.map(levelName => (
                                         <th key={levelName} className="px-6 py-3 border-subtle border-2">{levelName}</th>
@@ -78,7 +78,7 @@ const AdminDashboard = ({ data }: { data: AdminDashboardResponse }) => {
                     <table className="w-full text-sm text-left">
                         <thead className="text-xs uppercase bg-surface">
                             <tr>
-                                <th className="px-6 py-3 border-subtle border-2 w-48">Metric</th>
+                                <th className="px-6 py-3 border-subtle border-2 w-48">Course</th>
                                 {hasCourseData ? (
                                     courseNames.map(courseName => (
                                         <th key={courseName} className="px-6 py-3 border-subtle border-2">{courseName}</th>

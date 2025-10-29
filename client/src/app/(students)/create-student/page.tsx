@@ -109,7 +109,7 @@ const CreateStudent = () => {
 
                 if(!response.ok) {
                     const responseText = await response.json();
-                    throw new Error("Failed to update student. Reason: " + responseText);
+                    throw new Error("Failed to update student. Reason: " + responseText.detail);
                 } else {
                     const data: Student = await response.json();
                     setSelectedStudent(data);

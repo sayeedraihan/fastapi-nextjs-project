@@ -6,10 +6,11 @@ import TableHeader from "./header/header"
 import { useModal } from "@/app/hooks/modal/useModal";
 import { useState } from "react";
 import { StudentDeleteParams } from "./row/row";
+import { StudentListDetail } from "../../students";
 
 export type TableProps = {
     columnHeaders: string[];
-    tableData: Student[];
+    tableData: StudentListDetail[];
 }
 
 const Table = ({columnHeaders, tableData}: TableProps) => {

@@ -7,7 +7,7 @@ from starlette.requests import Request
 from datetime import datetime, timezone
 
 from src.models.db_models import Student
-from src.models.request_response_models import BaseRequestResponse, StudentListResponse, StudentUpdateResponseParams
+from src.models.request_response_models import BaseRequestResponse, StudentListResponse, StudentUpdateResponseParams, StudentListDetail
 from src.utils.student_utils import check_existing_student, populate_empty_fields
 
 class StudentService:
@@ -61,9 +61,9 @@ class StudentService:
 
     @staticmethod
     def select_student_by_id(session: Session, query_id: int):
-        statement = select(Student).where(Student.id == query_id)
-        students = session.exec(statement).all()
-        return students
+        statement = select(Student.id, Student.name, Student.roll, Student.level, Student.section, Student.medium, Student.updated_at, Student.updated_by, Student.user_id).where(Student.id == query_id)
+        student: StudentListDetail = session.exec(statement).first()
+        return student
 
     @staticmethod
     def select_student_by_id_v2(session: Session, id: int):
@@ -168,7 +168,7 @@ class StudentService:
             value = ""
         if filter in ["roll", "id"]:
             value = int(value)
-        base_query = select(Student).where(Student.status == 'A')
+        base_query = select(Student.id, Student.name, Student.roll, Student.level, Student.section, Student.medium, Student.updated_at, Student.updated_by, Student.user_id).where(Student.status == 'A')
         if value != '' and filter != '':
             base_query = base_query.where(getattr(Student, filter) == value)
         count_query = select(func.count()).select_from(base_query.subquery())
@@ -184,7 +184,23 @@ class StudentService:
 
         offset = (page - 1)*limit
         student_list_query = base_query.offset(offset).limit(limit)
-        students = session.exec(student_list_query).all()
-        return StudentListResponse(page_count = page_count, students = students)
+        students_from_db = session.exec(student_list_query).all()
+        student_list_details :list[StudentListDetail] = []
+        for student in students_from_db:
+            
+            student_list_details.append(
+                StudentListDetail(
+                    id=student.id,
+                    name=student.name,
+                    roll=student.roll,
+                    level=student.level,
+                    section=student.section,
+                    medium=student.medium,
+                    updated_at=student.updated_at,
+                    updated_by=student.updated_by,
+                    user_id=student.user_id
+                )
+            )
+        return StudentListResponse(page_count = page_count, students = student_list_details)
 
 student_service = StudentService()

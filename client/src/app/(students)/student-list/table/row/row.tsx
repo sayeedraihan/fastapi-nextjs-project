@@ -3,13 +3,13 @@
 import { Student, useStudent } from "@/app/contexts/student-context";
 import DataCell from "../cell/dataCell/dataCell";
 import HeadCell from "../cell/headCell/headCell"
-import { handleTableRowClickEvent } from "@/app/(students)/students";
+import { handleTableRowClickEvent, StudentListDetail } from "@/app/(students)/students";
 import { useRouter } from "next/navigation";
 import { formatUtcToLocal } from "@/app/utils/datetime";
 
 export type TableRowProps = {
     columnHeaders: string[];
-    rowData?: Student;
+    rowData?: StudentListDetail;
     onDeleteClick?: (id: string) => void;
     index?: number;
 }

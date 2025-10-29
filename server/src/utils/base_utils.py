@@ -16,26 +16,6 @@ def create_json_response(objects: Union[SQLModel, list[SQLModel]]):
         return JSONResponse(content = objects.model_dump_json())
 
 @unique
-class Level(Enum):
-    ONE    = "One"
-    TWO    = 'Two'
-    THREE  = 'Three'
-    FOUR   = 'Four'
-    FIVE   = 'Five'
-    SIX    = 'Six'
-    SEVEN  = 'Seven'
-    EIGHT  = 'Eight'
-    NINE   = 'Nine'
-    TEN    = 'Ten'
-    ELEVEN = 'Eleven'
-    TWELVE = 'Twelve'
-
-@unique
-class Medium(Enum):
-    Bangla  = 'Ban'
-    English = 'Eng'
-
-@unique
 class Field(Enum):
     ID      = 'id'
     Name    = 'name'
@@ -46,3 +26,4 @@ class Field(Enum):
 class Role(Enum):
     ADMIN   = "A"
     STUDENT = "S"
+

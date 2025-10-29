@@ -94,27 +94,41 @@ const PerformancePage = () => {
 
     // Enables editing for a specific row.
     const handleEdit = (index: number) => {
-        setEditingRowIndex(index);
+        if(editingRowIndex == null) {
+            setEditingRowIndex(index);
+        } else {
+            showModal(
+                `Please complete / cancel editing on the current row (row no. ${editingRowIndex + 1}) before editing this row.`,
+                () => {}
+            );
+        }
     };
 
     // Deletes a performance record from the database.
     const handleDelete = async (index: number) => {
-        const performance = performances[index];
-        try {
-            const response = await fetch('/routes/delete-performance', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ student_id: performance.student_id, course_id: performance.course_id }),
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Failed to delete performance');
+        if(editingRowIndex != null) {
+            showModal(
+                `Please complete / cancel editing on the current row (row no. ${editingRowIndex + 1}) before editing this row.`,
+                () => {}
+            )
+        } else {
+            const performance = performances[index];
+            try {
+                const response = await fetch('/routes/delete-performance', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_id: performance.student_id, course_id: performance.course_id }),
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to delete performance');
+                }
+                const newPerformances = performances.filter((_, i) => i !== index);
+                setPerformances(newPerformances);
+                setOriginalPerformances(newPerformances);
+            } catch (error: unknown) {
+                catchError(error, "Failed to delete Performance: ", "Failed to delete Performance Record for unknown reason.");
             }
-            const newPerformances = performances.filter((_, i) => i !== index);
-            setPerformances(newPerformances);
-            setOriginalPerformances(newPerformances);
-        } catch (error: unknown) {
-            catchError(error, "Failed to delete Performance: ", "Failed to delete Performance Record for unknown reason.");
         }
     };
 
@@ -204,6 +218,7 @@ const PerformancePage = () => {
                 <table className="w-full text-sm text-left">
                     <thead className="text-xs uppercase bg-surface">
                         <tr>
+                            <th className="px-6 py-3">No.</th>
                             <th className="px-6 py-3">Course Name</th>
                             <th className="px-6 py-3">Description</th>
                             <th className="px-6 py-3">Attendance</th>
@@ -211,7 +226,6 @@ const PerformancePage = () => {
                             <th className="px-6 py-3">Practical</th>
                             <th className="px-6 py-3">In-course</th>
                             <th className="px-6 py-3 text-center">Actions</th>
-                            <th className="px-6 py-3 text-center">Save/Cancel</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -221,6 +235,9 @@ const PerformancePage = () => {
 
                             return (
                                 <tr key={index} className="border-b border-subtle hover:bg-surface/10">
+                                    <td className="px-6 py-4">
+                                        {index+1}
+                                    </td>
                                     <td className="px-6 py-4">
                                         {isEditing ? (
                                             <select
@@ -260,12 +277,22 @@ const PerformancePage = () => {
                                         </td>
                                     ))}
                                     <td className="px-6 py-4 text-center">
-                                        <button onClick={() => handleEdit(index)} disabled={isEditing || !p.course_id} className="font-medium text-primary hover:underline disabled:text-disabled disabled:no-underline">Edit</button>
-                                        <button onClick={() => handleDelete(index)} disabled={isEditing || !p.course_id} className="font-medium text-destructive hover:underline ml-4 disabled:text-disabled disabled:no-underline">Delete</button>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <button onClick={() => handleSave(index)} disabled={!isEditing} className="font-medium text-success hover:underline disabled:text-disabled disabled:no-underline">Save</button>
-                                        <button onClick={() => handleCancel(index)} disabled={!isEditing} className="font-medium text-textsecondary hover:underline ml-4 disabled:text-disabled disabled:no-underline">Cancel</button>
+                                        {
+                                            isEditing ? (
+                                                <>
+                                                    <button onClick={() => handleSave(index)} className="font-medium text-success hover:underline disabled:text-disabled disabled:no-underline">Save</button>
+                                                    <button onClick={() => handleCancel(index)} className="font-medium text-textsecondary hover:underline ml-4 disabled:text-disabled disabled:no-underline">Cancel</button>
+                                                </>
+                                            ) : (<></>)
+                                        }
+                                        {
+                                            (!isEditing && p.course_id) ? (
+                                                <>
+                                                    <button onClick={() => handleEdit(index)} className="font-medium text-primary hover:underline disabled:text-disabled disabled:no-underline">Edit</button>
+                                                    <button onClick={() => handleDelete(index)} className="font-medium text-destructive hover:underline ml-4 disabled:text-disabled disabled:no-underline">Delete</button>
+                                                </>
+                                            ) : (<></>)
+                                        }
                                     </td>
                                 </tr>
                             );

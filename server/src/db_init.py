@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, text
 from sqlmodel import SQLModel, Session, select
 import threading
 
-from src.models.db_models import User
+from src.models.db_models import ClassLevel, Medium, User
 from src.env import sqlite_url
 from src.utils.authentication_utils import get_password_hash
 
@@ -75,6 +75,22 @@ def initialize_database():
         session.exec(text(TRIGGER_PERFORMANCE_UPDATED_AT))
         session.exec(text(TRIGGER_USER_UPDATED_AT))
 
+        if not session.exec(select(ClassLevel)).first():
+            levels_data = [
+                ("ONE", "One"), ("TWO", "Two"), ("THREE", "Three"), ("FOUR", "Four"),
+                ("FIVE", "Five"), ("SIX", "Six"), ("SEVEN", "Seven"), ("EIGHT", "Eight"),
+                ("NINE", "Nine"), ("TEN", "Ten"), ("ELEVEN", "Eleven"), ("TWELVE", "Twelve")
+            ]
+            for name, value in levels_data:
+                session.add(ClassLevel(name=name, value=value, created_by="SYS", updated_by="SYS"))
+
+        if not session.exec(select(Medium)).first():
+            mediums_data = [("Bangla", "Ban"), ("English", "Eng")]
+            for name, value in mediums_data:
+                session.add(Medium(name=name, value=value, created_by="SYS", updated_by="SYS"))
+
+        session.commit()
+
         admin_user = session.exec(select(User).where(User.username == 'admin')).first()
         if not admin_user:
             hashed_password = get_password_hash('admin')
@@ -95,3 +111,4 @@ def get_session():
     with db_lock:
         with Session(engine) as session:
             yield session
+

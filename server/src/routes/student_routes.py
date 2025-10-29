@@ -11,7 +11,7 @@ from src.models.student import StudentBase
 from src.db_init import get_session
 from src.service.student_service import student_service
 from src.models.db_models import Student
-from src.models.request_response_models import BaseRequestResponse, StudentListResponse, StudentUpdateResponseParams, StudentDeleteParams
+from src.models.request_response_models import BaseRequestResponse, StudentListDetail, StudentListResponse, StudentUpdateResponseParams, StudentDeleteParams
 from src.models.db_models import User
 from src.routes.base_routes import get_router
 from src.utils.user_utils import role_checker
@@ -33,13 +33,13 @@ def add_new_student(*, session: Session = Depends(get_session),
     student = student_service.add_student(session, student, current_user.username)
     return student
 
-@router.get("/get-all-students")
+@router.get("/get-all-students", response_model=StudentListResponse)
 def get_all_students(*, session: Session = Depends(get_session), 
                     current_user: Annotated[User, admin_dependency],
                     property: Optional[str] = "",
                     value: Optional[str | int] = "",
                     page: int = 1,
-                    limit: int = 10):
+                    limit: int = 10) -> StudentListResponse:
     student_list_response: StudentListResponse = student_service.get_paginated_student_list(
         session, property, value, page, limit
     )
@@ -49,13 +49,14 @@ def get_all_students(*, session: Session = Depends(get_session),
     return student_list_response
 
 @router.get("/get-student-by-id/{student_id}")
-def get_student_by_id(*, session: Session = Depends(get_session),
-                      student_id: str,
-                      current_user: Annotated[User, admin_dependency]):
-    students = student_service.select_student_by_id(session, int(student_id))
-    if not students:
+def get_student_by_id(*, session: Session = Depends(get_session), 
+                    response_model=StudentListDetail,
+                    student_id: str,
+                    current_user: Annotated[User, admin_dependency]) -> StudentListDetail:
+    student: StudentListDetail = student_service.select_student_by_id(session, int(student_id))
+    if not student:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Student found with this ID")
-    return students
+    return student
 
 @router.put("/update-student-by-id")
 def update_students_by_id(*, session: Session = Depends(get_session),
